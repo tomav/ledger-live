@@ -48,6 +48,7 @@ export const fromTransactionRaw = (tr: TransactionRaw): Transaction => {
     feesStrategy: tr.feesStrategy,
   };
 };
+
 export const toTransactionRaw = (t: Transaction): TransactionRaw => {
   const common = toTransactionCommonRaw(t);
   return {
