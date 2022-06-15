@@ -1,12 +1,17 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Image, Platform, ScrollView, View } from "react-native";
+import { Dimensions, Image, Platform, ScrollView, View } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { Button, Flex, Text } from "@ledgerhq/native-ui";
 import styled from "styled-components/native";
 import ImageProcessor from "./ImageProcessor";
 import GalleryPicker from "./GalleryPicker";
 import ImageCropper from "./ImageCropper";
-import { downloadImageToFile, loadImageSizeAsync } from "./imageUtils";
+import {
+  downloadImageToFile,
+  fitImageContain,
+  ImageDimensions,
+  loadImageSizeAsync,
+} from "./imageUtils";
 
 type RouteParams = {
   imageUrl?: string;
@@ -19,11 +24,6 @@ const PreviewImage = styled(Image).attrs({
   height: 200px;
 `;
 
-type ImageDimensions = {
-  height: number;
-  width: number;
-};
-
 type SrcImage = ImageDimensions & {
   uri: string;
 };
@@ -33,26 +33,20 @@ type CroppedImage = ImageDimensions & {
 };
 
 type ResultImage = ImageDimensions & {
-  base64URI: string;
+  base64Data: string;
 };
 
-function fallbackIsNan(number: number, fallback: number): number {
-  return isNaN(number) ? fallback : number;
-}
+type RawResult = ImageDimensions & {
+  hexData: string;
+};
 
 export default function ImagePicker() {
   const imageProcessorRef = useRef<ImageProcessor>(null);
   // const [srcImageBase64, setSrcImageBase64] = useState<string | null>(null);
   const [srcImage, setSrcImage] = useState<SrcImage | null>(null);
   const [croppedImage, setCroppedImage] = useState<CroppedImage | null>(null);
-  // const [resultImage, setResultImage] = useState<ResultImage | null>(null);
-
-  const [resultImageBase64, setResultImageBase64] = useState<string | null>(
-    null,
-  );
-  const [resultImageRawHex, setResultImageRawHex] = useState<string | null>(
-    null,
-  );
+  const [resultImage, setResultImage] = useState<ResultImage | null>(null);
+  const [rawResult, setRawResult] = useState<RawResult | null>(null);
 
   const { params = {} }: { params?: RouteParams } = useRoute();
 
@@ -93,18 +87,18 @@ export default function ImagePicker() {
 
   /** RESULT IMAGE HANDLING */
 
-  const handleBase64PreviewResult = useCallback(
+  const handlePreviewResult = useCallback(
     data => {
-      setResultImageBase64(data);
+      setResultImage(data);
     },
-    [setResultImageBase64],
+    [setResultImage],
   );
 
-  const handleRawHexResult = useCallback(
+  const handleRawResult = useCallback(
     data => {
-      setResultImageRawHex(data);
+      setRawResult(data);
     },
-    [setResultImageRawHex],
+    [setRawResult],
   );
 
   const requestRawResult = useCallback(() => {
@@ -113,9 +107,38 @@ export default function ImagePicker() {
 
   const [contrast, setContrast] = useState(1);
 
+  const boxToFitDimensions = {
+    width: Dimensions.get("screen").width - 20,
+    height: Dimensions.get("screen").height,
+  };
+
+  const sourceDimensions = fitImageContain(
+    srcImage
+      ? { height: srcImage.height, width: srcImage.width }
+      : { height: 200, width: 200 },
+    boxToFitDimensions,
+  );
+
+  const cropAspectRatio = {
+    width: 1080,
+    height: 1400,
+  };
+
+  const cropDimensions = fitImageContain(cropAspectRatio, boxToFitDimensions);
+
+  const previewDimensions =
+    resultImage &&
+    fitImageContain(
+      {
+        width: resultImage.width,
+        height: resultImage.height,
+      },
+      boxToFitDimensions,
+    );
+
   return (
     <ScrollView>
-      <Flex p={5}>
+      <Flex p="10px">
         {!paramsImageURL && (
           <GalleryPicker onResult={handleGalleryPickerResult} />
         )}
@@ -126,13 +149,7 @@ export default function ImagePicker() {
             </Text>
             <PreviewImage
               source={{ uri: srcImage?.uri }}
-              style={{
-                height: 200,
-                width: fallbackIsNan(
-                  (srcImage.width / srcImage.height) * 200,
-                  200,
-                ),
-              }}
+              style={{ ...sourceDimensions }}
             />
             <Flex height={5} />
             <Text mt={5} variant="h3">
@@ -140,8 +157,8 @@ export default function ImagePicker() {
             </Text>
             <ImageCropper
               sourceUri={srcImage.uri}
-              aspectRatio={{ height: 1920, width: 1080 }}
-              style={{ alignSelf: "center", height: 640 / 2, width: 360 / 2 }}
+              aspectRatio={cropAspectRatio}
+              style={{ alignSelf: "center", ...cropDimensions }}
               onResult={handleCropResult}
             />
           </Flex>
@@ -151,42 +168,49 @@ export default function ImagePicker() {
             <Text mt={5} variant="h3">
               Image processing:
             </Text>
-            <View style={{ flexDirection: "row" }}>
-              <Button onPress={() => setContrast(1)} type="color">
-                1
-              </Button>
-              <Button onPress={() => setContrast(2)} type="color">
-                2
-              </Button>
-              <Button onPress={() => setContrast(5)} type="color">
-                3
-              </Button>
-              <Button onPress={() => setContrast(8)} type="color">
-                4
-              </Button>
-            </View>
             <ImageProcessor
               ref={imageProcessorRef}
               srcImageBase64={croppedImage?.base64URI}
-              onBase64PreviewResult={handleBase64PreviewResult}
-              onRawHexResult={handleRawHexResult}
+              onPreviewResult={handlePreviewResult}
+              onRawResult={handleRawResult}
               contrast={contrast}
             />
+            <Flex flexDirection="row" pt={3}>
+              {[1, 2, 5, 8].map((val, index) => (
+                <Button
+                  key={index}
+                  onPress={() => setContrast(val)}
+                  type="color"
+                >
+                  {index + 1}
+                </Button>
+              ))}
+            </Flex>
           </>
         )}
-        {resultImageBase64 && (
+        {resultImage?.base64Data && (
           <Flex>
             <Text mt={5} variant="h3">
               result:
             </Text>
-            <PreviewImage source={{ uri: resultImageBase64 }} />
+            <Text>width: {resultImage?.width}</Text>
+            <Text>height: {resultImage?.height}</Text>
+            <PreviewImage
+              source={{ uri: resultImage.base64Data }}
+              style={{
+                height: previewDimensions?.height,
+                width: previewDimensions?.width,
+              }}
+            />
             <Button type="main" onPress={requestRawResult}>
               Request & display (shortened) hex data
             </Button>
-            {resultImageRawHex && (
+            {rawResult?.hexData && (
               <>
                 <Text>Raw result:</Text>
-                <Text>{resultImageRawHex.slice(0, 2000)}</Text>
+                <Text>width: {rawResult?.width}</Text>
+                <Text>height: {rawResult?.height}</Text>
+                <Text>{rawResult?.hexData.slice(0, 2000)}</Text>
               </>
             )}
           </Flex>

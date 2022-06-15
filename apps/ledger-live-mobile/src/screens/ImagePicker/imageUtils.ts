@@ -88,3 +88,33 @@ export async function loadImageSizeAsync(url: string) {
     );
   });
 }
+
+export type ImageDimensions = {
+  height: number;
+  width: number;
+};
+
+export function fitImageContain(
+  imageDimensions: ImageDimensions,
+  boxDimensions: ImageDimensions,
+): { height: number; width: number } {
+  const { height: imageHeight, width: imageWidth } = imageDimensions;
+  const { height: boxHeight, width: boxWidth } = boxDimensions;
+  if (imageHeight < boxHeight && imageWidth < boxWidth)
+    return {
+      width: imageWidth,
+      height: imageHeight,
+    };
+  if (imageWidth / imageHeight >= boxWidth / boxHeight) {
+    // width is the constraint
+    return {
+      width: boxWidth,
+      height: (imageHeight / imageWidth) * boxWidth,
+    };
+  }
+  // height is the constraint
+  return {
+    width: (imageWidth / imageHeight) * boxHeight,
+    height: boxHeight,
+  };
+}

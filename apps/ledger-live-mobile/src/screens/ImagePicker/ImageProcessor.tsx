@@ -1,13 +1,20 @@
 import React from "react";
-import { Button, Icons } from "@ledgerhq/native-ui";
 import { WebView } from "react-native-webview";
 import { injectedCode } from "./injectedCode";
 import { InjectedCodeDebugger } from "./InjectedCodeDebugger";
 
 type Props = {
   srcImageBase64: string;
-  onBase64PreviewResult: (base64Preview: string) => void;
-  onRawHexResult: (rawHexResult: string) => void;
+  onPreviewResult: (arg: {
+    base64Data: string;
+    width: number;
+    height: number;
+  }) => void;
+  onRawResult: (arg: {
+    hexData: string;
+    width: number;
+    height: number;
+  }) => void;
   /**
    * number >= 0
    *  - 0:  full black
@@ -31,17 +38,25 @@ export default class ImageProcessor extends React.Component<Props> {
   }
 
   handleMessage = ({ nativeEvent: { data } }: any) => {
-    const { onBase64PreviewResult, onRawHexResult } = this.props;
+    const { onPreviewResult, onRawResult } = this.props;
     const { type, payload } = JSON.parse(data);
     switch (type) {
       case "LOG":
         console.log("WEBVIEWLOG:", payload);
         break;
       case "BASE64_RESULT":
-        onBase64PreviewResult(payload);
+        onPreviewResult({
+          width: payload.width,
+          height: payload.height,
+          base64Data: payload.base64Data,
+        });
         break;
       case "RAW_RESULT":
-        onRawHexResult(payload);
+        onRawResult({
+          width: payload.width,
+          height: payload.height,
+          hexData: payload.hexData,
+        });
         break;
       default:
         break;
@@ -88,15 +103,6 @@ export default class ImageProcessor extends React.Component<Props> {
     return (
       <>
         <InjectedCodeDebugger injectedCode={injectedCode} />
-        <Button
-          Icon={Icons.RefreshMedium}
-          type="main"
-          outline
-          mt={3}
-          onPress={this.reloadWebView}
-        >
-          Reload WebView
-        </Button>
         <WebView
           ref={c => (this.webViewRef = c)}
           injectedJavaScript={injectedCode}

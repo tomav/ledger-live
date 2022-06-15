@@ -116,7 +116,11 @@ function codeToInject() {
       const grayScaleBase64 = grayCanvas.toDataURL();
       postDataToWebView({
         type: "BASE64_RESULT",
-        payload: grayScaleBase64,
+        payload: {
+          base64Data: grayScaleBase64,
+          width: image.width,
+          height: image.height,
+        },
       });
     } catch (e) {
       if (e instanceof Error) {
@@ -159,7 +163,11 @@ function codeToInject() {
      */
     postDataToWebView({
       type: "RAW_RESULT",
-      payload: rawResult,
+      payload: {
+        hexData: rawResult,
+        width: image.width,
+        height: image.height,
+      },
     });
   };
 }
