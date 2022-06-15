@@ -42,21 +42,20 @@ type Props = {
   style?: Object;
   status: string;
   src: string;
+  srcFallback: string;
   resizeMode?: ResizeMode;
   colors: any;
-  useFallback: boolean;
-  setUseFallback: (_useFallback: boolean) => void;
 };
 
 type State = {
   error: boolean;
+  usingFallback: boolean;
 };
 
 class NftImage extends React.PureComponent<Props, State> {
   state = {
-    beforeLoadDone: false,
     error: false,
-    contentType: null,
+    usingFallback: false,
   };
 
   opacityAnim = new Animated.Value(0);
@@ -71,25 +70,32 @@ class NftImage extends React.PureComponent<Props, State> {
 
   onLoad = ({ nativeEvent }: OnLoadEvent) => {
     if (!nativeEvent) {
-      if (!this.props.useFallback) {
-        this.props.setUseFallback(true);
-      } else {
+      if (this.state.usingFallback) {
         this.setState({ error: true });
+      } else {
+        this.setState({ usingFallback: true });
       }
     }
   };
 
   onError = () => {
-    if (!this.props.useFallback) {
-      this.props.setUseFallback(true);
-    } else {
+    if (this.state.usingFallback) {
       this.setState({ error: true });
+    } else {
+      this.setState({ usingFallback: true });
     }
   };
 
   render() {
-    const { style, status, src, colors, resizeMode = "cover" } = this.props;
-    const { error } = this.state;
+    const {
+      style,
+      src,
+      srcFallback,
+      status,
+      colors,
+      resizeMode = "cover",
+    } = this.props;
+    const { error, usingFallback } = this.state;
 
     const noData = status === "nodata";
     const metadataError = status === "error";
@@ -110,6 +116,7 @@ class NftImage extends React.PureComponent<Props, State> {
             <NotFound colors={colors} onLayout={this.startAnimation} />
           ) : (
             <ImageComponent
+              key={Number(this.state.usingFallback)}
               style={[
                 styles.image,
                 {
@@ -118,7 +125,7 @@ class NftImage extends React.PureComponent<Props, State> {
               ]}
               resizeMode={resizeMode}
               source={{
-                uri: src,
+                uri: usingFallback ? srcFallback : src,
               }}
               onLoad={this.onLoad}
               onLoadEnd={this.startAnimation}
