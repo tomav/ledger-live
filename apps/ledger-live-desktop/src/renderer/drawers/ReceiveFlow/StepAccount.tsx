@@ -7,10 +7,7 @@ import {
   CryptoCurrency,
   TokenCurrency,
 } from "@ledgerhq/live-common/lib/types";
-import {
-  listTokensForCryptoCurrency,
-  listTokenTypesForCryptoCurrency,
-} from "@ledgerhq/cryptoassets";
+import { listTokensForCryptoCurrency, listTokenTypesForCryptoCurrency } from "@ledgerhq/live-common/lib/currencies";
 import {
   getAccountCurrency,
   getMainAccount,

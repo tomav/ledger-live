@@ -41,7 +41,6 @@ const babelTsConfig = {
   ],
   plugins: [
     ...babelPlugins,
-    "react-hot-loader/babel",
     [
       "babel-plugin-styled-components",
       {

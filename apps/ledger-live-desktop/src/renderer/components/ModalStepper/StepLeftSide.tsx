@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import FlexBox from "@ledgerhq/react-ui/components/layout/Flex";
 import { Button, Text } from "@ledgerhq/react-ui";
-import { ArrowRightRegular } from "@ledgerhq/icons-ui/react";
+import Icons from "@ledgerhq/react-ui";
 
 const Container = styled(FlexBox).attrs(() => ({
   flexDirection: "column",
@@ -61,7 +61,7 @@ const StepLeftSide = ({
           <Button
             disabled={continueDisabled}
             variant="main"
-            Icon={ArrowRightRegular}
+            Icon={Icons.ArrowRightRegular}
             onClick={onClickContinue}
           >
             {continueLabel}

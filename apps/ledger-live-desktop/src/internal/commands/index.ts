@@ -6,8 +6,6 @@ import flushDevice from "./flushDevice";
 import firmwareUpdating from "./firmwareUpdating";
 import getLatestFirmwareForDevice from "./getLatestFirmwareForDevice";
 import getSatStackStatus from "./getSatStackStatus";
-import libcoreGetVersion from "./libcoreGetVersion";
-import libcoreReset from "./libcoreReset";
 import listenDevices from "./listenDevices";
 import listApps from "./listApps";
 import signMessage from "./signMessage";
@@ -37,8 +35,6 @@ export const commandsById = {
   firmwareUpdating,
   getLatestFirmwareForDevice,
   getSatStackStatus,
-  libcoreGetVersion,
-  libcoreReset,
   listenDevices,
   connectApp,
   connectManager,

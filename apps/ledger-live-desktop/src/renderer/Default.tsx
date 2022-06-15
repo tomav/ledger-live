@@ -26,7 +26,6 @@ import Idler from "~/renderer/components/Idler";
 import IsUnlocked from "~/renderer/components/IsUnlocked";
 import AppRegionDrag from "~/renderer/components/AppRegionDrag";
 import IsNewVersion from "~/renderer/components/IsNewVersion";
-import LibcoreBusyIndicator from "~/renderer/components/LibcoreBusyIndicator";
 import DeviceBusyIndicator from "~/renderer/components/DeviceBusyIndicator";
 import KeyboardContent from "~/renderer/components/KeyboardContent";
 import PerfIndicator from "~/renderer/components/PerfIndicator";
@@ -77,7 +76,7 @@ const NightlyLayerR = () => {
             transform: "rotate(-45deg)",
           }}
         >
-          NIGHTLY
+          PRERELEASE
           <br />
           {__APP_VERSION__}
         </div>,
@@ -220,9 +219,10 @@ export default function Default() {
                   <ToastOverlay />
                 </Box>
 
-                {__NIGHTLY__ ? <NightlyLayer /> : null}
+                {__PRERELEASE__ && __CHANNEL__ !== "next" && !__CHANNEL__.includes("sha") ? (
+                  <NightlyLayer />
+                ) : null}
 
-                <LibcoreBusyIndicator />
                 <DeviceBusyIndicator />
                 <KeyboardContent sequence="BJBJBJ">
                   <PerfIndicator />

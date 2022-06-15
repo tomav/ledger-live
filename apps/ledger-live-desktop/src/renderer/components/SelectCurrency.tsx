@@ -15,12 +15,7 @@ import {
 } from "@ledgerhq/react-ui/components/form/SelectInput/Option";
 
 // TODO: update react-select just before V3 gets merged instead of relying on a nested version…
-import {
-  components,
-  SingleValueProps,
-  ValueContainerProps,
-  ControlProps,
-} from "@ledgerhq/react-ui/node_modules/react-select";
+import { components, SingleValueProps, ValueContainerProps, ControlProps } from "react-select-v5";
 
 // it seems this component only uses crypto and token currencies, not fiat ones
 // since it uses the 'id' prop that is not present on fiat currencies

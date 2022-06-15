@@ -34,7 +34,7 @@ import {
   SingleValueProps,
   ControlProps,
   IndicatorsContainerProps,
-} from "@ledgerhq/react-ui/node_modules/react-select";
+} from "react-select-v5";
 
 const IndentLine = styled.div`
   height: 36px;

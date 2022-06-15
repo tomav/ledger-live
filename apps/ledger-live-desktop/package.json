@@ -77,6 +77,7 @@
     "i18next": "^19.9.2",
     "invariant": "^2.2.4",
     "ip": "^1.1.5",
+    "react-select-v5": "npm:react-select@5",
     "isomorphic-unfetch": "^3.1.0",
     "json-rpc-2.0": "^0.2.19",
     "jsqr": "^1.4.0",
