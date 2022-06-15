@@ -1,7 +1,6 @@
 const path = require("path");
 const babelPlugins = require("./babel.plugins");
 const UnusedWebpackPlugin = require("unused-webpack-plugin");
-const CopyPlugin = require("copy-webpack-plugin");
 
 const babelConfig = {
   presets: [
@@ -37,12 +36,15 @@ module.exports = {
       directories: [path.join(__dirname, "src/main"), path.join(__dirname, "src/internal")],
       exclude: ["*.test.js", "*.html", "updater/*"],
     }),
-    new CopyPlugin({
-      patterns: [{ from: path.join(__dirname, "build/icons"), to: "build/icons" }],
-    }),
   ],
   module: {
     rules: [
+      {
+        test: /\.(ts)x?$/,
+        exclude: /node_modules/,
+        loader: "babel-loader",
+        options: babelTsConfig,
+      },
       {
         test: /\.js$/i,
         loader: "babel-loader",
@@ -67,5 +69,20 @@ module.exports = {
     alias: {
       "~": path.resolve(__dirname, "src"),
     },
+    ...(process.env.V3
+      ? {
+          extensions: [
+            ".v3.tsx",
+            ".v3.ts",
+            ".v3.jsx",
+            ".v3.js",
+            ".tsx",
+            ".ts",
+            ".jsx",
+            ".js",
+            "...",
+          ],
+        }
+      : {}),
   },
 };
