@@ -12,6 +12,7 @@ import {
   ImageDimensions,
   loadImageSizeAsync,
 } from "./imageUtils";
+import ImageResizer from "./ImageResizer";
 
 type RouteParams = {
   imageUrl?: string;
@@ -42,9 +43,12 @@ type RawResult = ImageDimensions & {
 
 export default function ImagePicker() {
   const imageProcessorRef = useRef<ImageProcessor>(null);
-  // const [srcImageBase64, setSrcImageBase64] = useState<string | null>(null);
   const [srcImage, setSrcImage] = useState<SrcImage | null>(null);
   const [croppedImage, setCroppedImage] = useState<CroppedImage | null>(null);
+  const [
+    croppedAndResizedImage,
+    setCroppedAndResizedImage,
+  ] = useState<CroppedImage | null>(null);
   const [resultImage, setResultImage] = useState<ResultImage | null>(null);
   const [rawResult, setRawResult] = useState<RawResult | null>(null);
 
@@ -83,6 +87,16 @@ export default function ImagePicker() {
       setCroppedImage({ width, height, base64URI: base64Image });
     },
     [setCroppedImage],
+  );
+
+  /** RESIZED IMAGE HANDLING */
+
+  const handleResizeResult = useCallback(
+    ({ width, height, base64Image }) => {
+      console.log({height, width, base64Image: base64Image.slice(0, 100)});
+      setCroppedAndResizedImage({ width, height, base64URI: base64Image });
+    },
+    [setCroppedAndResizedImage],
   );
 
   /** RESULT IMAGE HANDLING */
@@ -153,24 +167,32 @@ export default function ImagePicker() {
             />
             <Flex height={5} />
             <Text mt={5} variant="h3">
-              Cropping:
+              Cropping: (ratio: H{cropAspectRatio.height}, W
+              {cropAspectRatio.width})
             </Text>
             <ImageCropper
               sourceUri={srcImage.uri}
               aspectRatio={cropAspectRatio}
-              style={{ alignSelf: "center", ...cropDimensions }}
+              style={{ alignSelf: "center", ...sourceDimensions }}
               onResult={handleCropResult}
             />
           </Flex>
         ) : null}
         {croppedImage?.base64URI && (
+          <ImageResizer
+            targetDimensions={cropAspectRatio}
+            sourceBase64Data={croppedImage?.base64URI}
+            onResult={handleResizeResult}
+          />
+        )}
+        {croppedAndResizedImage?.base64URI && (
           <>
             <Text mt={5} variant="h3">
               Image processing:
             </Text>
             <ImageProcessor
               ref={imageProcessorRef}
-              srcImageBase64={croppedImage?.base64URI}
+              srcImageBase64={croppedAndResizedImage?.base64URI}
               onPreviewResult={handlePreviewResult}
               onRawResult={handleRawResult}
               contrast={contrast}
