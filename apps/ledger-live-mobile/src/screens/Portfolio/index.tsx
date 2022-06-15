@@ -313,6 +313,18 @@ function PortfolioScreen({ navigation }: Props) {
           ref={ref => {
             this.storyly = ref;
           }}
+          onLoad={storyGroupList => console.log("[Storyly] onLoad")}
+          onFail={errorMessage => console.log("[Storyly] onFail")}
+          onStoryOpen={() => console.log("[Storyly] onStoryOpen")}
+          onStoryClose={() => console.log("[Storyly] onStoryClose")}
+          onPress={story => console.log("[Storyly] onPress")}
+          onEvent={eventPayload =>
+            console.log(
+              "[Storyly] onEvent",
+              JSON.stringify(eventPayload, null, 2),
+            )
+          }
+          onUserInteracted={console.log("[Storyly] onStoryUserInteracted")}
           storylyId={storylyToken}
         />
         <Flex px={6} py={4}>
