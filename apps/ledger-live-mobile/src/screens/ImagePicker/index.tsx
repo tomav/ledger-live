@@ -31,6 +31,11 @@ type SrcImage = ImageDimensions & {
 
 type CroppedImage = ImageDimensions & {
   base64URI: string;
+  fileURI: string;
+};
+
+type CroppedAndResizedImage = ImageDimensions & {
+  base64URI: string;
 };
 
 type ResultImage = ImageDimensions & {
@@ -48,7 +53,7 @@ export default function ImagePicker() {
   const [
     croppedAndResizedImage,
     setCroppedAndResizedImage,
-  ] = useState<CroppedImage | null>(null);
+  ] = useState<CroppedAndResizedImage | null>(null);
   const [resultImage, setResultImage] = useState<ResultImage | null>(null);
   const [rawResult, setRawResult] = useState<RawResult | null>(null);
 
@@ -83,8 +88,13 @@ export default function ImagePicker() {
   /** CROP IMAGE HANDLING */
 
   const handleCropResult = useCallback(
-    ({ width, height, base64Image }) => {
-      setCroppedImage({ width, height, base64URI: base64Image });
+    ({ width, height, base64Image, fileUri }) => {
+      setCroppedImage({
+        width,
+        height,
+        base64URI: base64Image,
+        fileURI: fileUri,
+      });
     },
     [setCroppedImage],
   );
@@ -93,7 +103,7 @@ export default function ImagePicker() {
 
   const handleResizeResult = useCallback(
     ({ width, height, base64Image }) => {
-      console.log({height, width, base64Image: base64Image.slice(0, 100)});
+      console.log({ height, width, base64Image: base64Image.slice(0, 100) });
       setCroppedAndResizedImage({ width, height, base64URI: base64Image });
     },
     [setCroppedAndResizedImage],
@@ -178,10 +188,11 @@ export default function ImagePicker() {
             />
           </Flex>
         ) : null}
-        {croppedImage?.base64URI && (
+        {croppedImage && (
           <ImageResizer
             targetDimensions={cropAspectRatio}
             sourceBase64Data={croppedImage?.base64URI}
+            sourceFileURI={croppedImage?.fileURI}
             onResult={handleResizeResult}
           />
         )}
