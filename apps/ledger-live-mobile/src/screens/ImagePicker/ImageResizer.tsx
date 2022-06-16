@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
-import { Platform } from "react-native";
 
 type Props = {
   sourceBase64Data: string;
@@ -18,11 +17,13 @@ const ImageResizer: React.FC<Props> = props => {
 
   useEffect(() => {
     manipulateAsync(
-      // Platform.OS === "android" ? sourceBase64Data : sourceFileURI,
       sourceFileURI,
       [
         {
-          resize: targetDimensions,
+          resize: {
+            width: targetDimensions.width,
+            height: targetDimensions.height,
+          },
         },
       ],
       { base64: true, compress: 1, format: SaveFormat.PNG },
@@ -30,7 +31,13 @@ const ImageResizer: React.FC<Props> = props => {
       const fullBase64 = `data:image/png;base64, ${base64}`;
       onResult({ base64Image: fullBase64, height, width });
     });
-  }, [sourceBase64Data, sourceFileURI]);
+  }, [
+    sourceBase64Data,
+    sourceFileURI,
+    targetDimensions?.height,
+    targetDimensions?.width,
+    onResult,
+  ]);
 
   return null;
 };

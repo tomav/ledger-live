@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Dimensions, Image, Platform, ScrollView, View } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { Button, Flex, Text } from "@ledgerhq/native-ui";
@@ -44,6 +50,16 @@ type ResultImage = ImageDimensions & {
 
 type RawResult = ImageDimensions & {
   hexData: string;
+};
+
+const boxToFitDimensions = {
+  width: Dimensions.get("screen").width - 20,
+  height: Dimensions.get("screen").height,
+};
+
+const cropAspectRatio = {
+  width: 1080,
+  height: 1400,
 };
 
 export default function ImagePicker() {
@@ -131,34 +147,26 @@ export default function ImagePicker() {
 
   const [contrast, setContrast] = useState(1);
 
-  const boxToFitDimensions = {
-    width: Dimensions.get("screen").width - 20,
-    height: Dimensions.get("screen").height,
-  };
-
-  const sourceDimensions = fitImageContain(
-    srcImage
-      ? { height: srcImage.height, width: srcImage.width }
-      : { height: 200, width: 200 },
-    boxToFitDimensions,
+  const sourceDimensions = useMemo(
+    () =>
+      fitImageContain(
+        { height: srcImage?.height ?? 200, width: srcImage?.width ?? 200 },
+        boxToFitDimensions,
+      ),
+    [srcImage?.height, srcImage?.width],
   );
 
-  const cropAspectRatio = {
-    width: 1080,
-    height: 1400,
-  };
-
-  const cropDimensions = fitImageContain(cropAspectRatio, boxToFitDimensions);
-
-  const previewDimensions =
-    resultImage &&
-    fitImageContain(
-      {
-        width: resultImage.width,
-        height: resultImage.height,
-      },
-      boxToFitDimensions,
-    );
+  const previewDimensions = useMemo(
+    () =>
+      fitImageContain(
+        {
+          width: resultImage?.width ?? 200,
+          height: resultImage?.height ?? 200,
+        },
+        boxToFitDimensions,
+      ),
+    [resultImage?.height, resultImage?.width],
+  );
 
   return (
     <ScrollView>
