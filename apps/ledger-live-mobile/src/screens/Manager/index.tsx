@@ -76,7 +76,7 @@ type Props = {
   navigation: any;
   knownDevices: DeviceLike[];
   route: {
-    params: RouteParams;
+    params?: RouteParams;
     name: string;
   };
 };
