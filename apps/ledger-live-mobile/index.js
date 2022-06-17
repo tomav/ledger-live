@@ -24,11 +24,14 @@ import * as Sentry from "@sentry/react-native";
 import Config from "react-native-config";
 import VersionNumber from "react-native-version-number";
 
+import { getEnv } from "@ledgerhq/live-common/lib/env";
 import BackgroundRunnerService from "./services/BackgroundRunnerService";
 import App, { routingInstrumentation } from "./src";
 import { getEnabled } from "./src/components/HookSentry";
 import logReport from "./src/log-report";
 import pkg from "./package.json";
+import { getAllDivergedFlags } from "./src/components/FirebaseFeatureFlags";
+import { enabledExperimentalFeatures } from "./src/experimental";
 
 // we exclude errors related to user's environment, not fixable by us
 const excludedErrorName = [
@@ -116,6 +119,25 @@ if (Config.SENTRY_DSN && !__DEV__ && !Config.MOCK) {
       return event;
     },
   });
+
+  // This sync the Sentry tags to include the extra information in context of events
+  const syncTheTags = () => {
+    const tags = {};
+    // if there are experimental on, we will add them in tags
+    enabledExperimentalFeatures().forEach(key => {
+      tags[`experimental_${key}`] = getEnv(key);
+    });
+    // if there are features on, we will add them in tags
+    const features = getAllDivergedFlags();
+    Object.keys(features).forEach(key => {
+      tags[`feature_${key}`] = features[key];
+    });
+    Sentry.setTags(tags);
+  };
+  // We need to wait firebase to load the data and then we set once for all the tags
+  setTimeout(syncTheTags, 5000);
+  // We also try to regularly update them so we are sure to get the correct tags (as these are dynamic)
+  setInterval(syncTheTags, 60000);
 }
 
 if (Config.DISABLE_YELLOW_BOX) {
