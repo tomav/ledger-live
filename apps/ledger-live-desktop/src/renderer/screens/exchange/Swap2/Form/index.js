@@ -1,6 +1,6 @@
 // @flow
-import React, { useCallback, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useCallback, useEffect, useMemo } from "react";
+import { useLocation, useHistory } from "react-router-dom";
 import SwapFormSummary from "./FormSummary";
 import SwapFormSelectors from "./FormSelectors";
 import Box from "~/renderer/components/Box";
@@ -8,7 +8,7 @@ import styled from "styled-components";
 import ButtonBase from "~/renderer/components/Button";
 import type { ThemedComponent } from "~/renderer/styles/StyleProvider";
 import { context } from "~/renderer/drawers/Provider";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import {
   useSwapProviders,
   usePollKYCStatus,
@@ -34,6 +34,10 @@ import TrackPage from "~/renderer/analytics/TrackPage";
 import { track } from "~/renderer/analytics/segment";
 import { SWAP_VERSION, trackSwapError } from "../utils/index";
 import { shallowAccountsSelector } from "~/renderer/reducers/accounts";
+import { getMainAccount } from "@ledgerhq/live-common/lib/account";
+import Alert from "~/renderer/components/Alert";
+import Text from "~/renderer/components/Text";
+import FakeLink from "~/renderer/components/FakeLink";
 
 const Wrapper: ThemedComponent<{}> = styled(Box).attrs({
   p: 20,
@@ -74,6 +78,31 @@ export const useProviders = () => {
     providersError,
   };
 };
+
+// This component render an Alert with links that lead to dex swap live apps.
+function DecentralizedSwapAvailableAlert() {
+  const history = useHistory();
+
+  const navigateTo = useCallback(
+    (appId: string) => () => {
+      history.push({
+        pathname: `/platform/${appId}`,
+      });
+    },
+    [history],
+  );
+
+  return (
+    <Alert mt="16px" type="secondary">
+      <Text ff="Inter|Medium" fontSize={4}>
+        <Trans i18nKey="swap.decentralizedSwapAvailable">
+          <FakeLink onClick={navigateTo("paraswap")} />
+          <FakeLink onClick={navigateTo("1inch-lld")} />
+        </Trans>
+      </Text>
+    </Alert>
+  );
+}
 
 const SwapForm = () => {
   const { t } = useTranslation();
@@ -170,8 +199,28 @@ const SwapForm = () => {
   };
 
   const sourceAccount = swapTransaction.swap.from.account;
+  const sourceParentAccount = swapTransaction.swap.from.parentAccount;
+  const targetAccount = swapTransaction.swap.to.account;
+  const targetParentAccount = swapTransaction.swap.to.parentAccount;
   const sourceCurrency = swapTransaction.swap.from.currency;
   const targetCurrency = swapTransaction.swap.to.currency;
+
+  // We check if a decentralized swap is available to conditionnaly render an Alert below.
+  // All Ethereum related currencies are considered available
+  const decentralizedSwapAvailable = useMemo(() => {
+    if (sourceAccount && targetAccount) {
+      const sourceMainAccount = getMainAccount(sourceAccount, sourceParentAccount);
+      const targetMainAccount = getMainAccount(targetAccount, targetParentAccount);
+
+      if (
+        targetMainAccount.currency.family === "ethereum" &&
+        sourceMainAccount.currency.id === targetMainAccount.currency.id
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }, [sourceAccount, sourceParentAccount, targetAccount, targetParentAccount]);
 
   if (providers?.length)
     return (
@@ -201,15 +250,25 @@ const SwapForm = () => {
           provider={provider}
         />
         {showWyreKYCBanner ? <FormKYCBanner provider={provider} status={kycStatus} /> : null}
-        <Button primary disabled={!isSwapReady} onClick={onSubmit} data-test-id="exchange-button">
-          {t("common.exchange")}
-        </Button>
+        <Box>
+          <Button primary disabled={!isSwapReady} onClick={onSubmit} data-test-id="exchange-button">
+            {t("common.exchange")}
+          </Button>
+          {decentralizedSwapAvailable ? <DecentralizedSwapAvailableAlert /> : null}
+        </Box>
       </Wrapper>
     );
 
   // TODO: ensure that the error is catch by Sentry in this case
-  if (providersError) return <FormNotAvailable />;
-  if (storedProviders?.length === 0) return <FormNotAvailable />;
+  if (storedProviders?.length === 0 || providersError)
+    return (
+      <>
+        <FormNotAvailable />
+        <Box px="18px" maxWidth="500px">
+          <DecentralizedSwapAvailableAlert />
+        </Box>
+      </>
+    );
 
   return <FormLoading />;
 };

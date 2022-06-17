@@ -35,6 +35,7 @@ import {
   flattenAccounts,
   getAccountCurrency,
   getAccountUnit,
+  getMainAccount,
 } from "@ledgerhq/live-common/lib/account";
 import { useDispatch, useSelector } from "react-redux";
 import { useCurrenciesByMarketcap } from "@ledgerhq/live-common/lib/currencies";
@@ -175,6 +176,7 @@ function SwapForm({
 
   const {
     from: { account: fromAccount, parentAccount: fromParentAccount },
+    to: { account: toAccount, parentAccount: toParentAccount },
     refetchRates,
   } = swap;
 
@@ -236,6 +238,23 @@ function SwapForm({
       cancelled = true;
     };
   }, [fromAccount, fromParentAccount, transaction]);
+
+  // We check if a decentralized swap is available to conditionnaly render an Alert below.
+  // All Ethereum related currencies are considered available
+  const decentralizedSwapAvailable = useMemo(() => {
+    if (fromAccount && toAccount) {
+      const sourceMainAccount = getMainAccount(fromAccount, fromParentAccount);
+      const targetMainAccount = getMainAccount(toAccount, toParentAccount);
+
+      if (
+        targetMainAccount.currency.family === "ethereum" &&
+        sourceMainAccount.currency.id === targetMainAccount.currency.id
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }, [fromAccount, fromParentAccount, toAccount, toParentAccount]);
 
   useEffect(() => {
     // update tx after a form navigation from fees edit to main screen
