@@ -58,6 +58,7 @@ import { swapAcceptProvider } from "../../actions/settings";
 import Connect from "./Connect";
 import { Track, TrackScreen } from "../../analytics";
 import DisclaimerModal from "./DisclaimerModal";
+import Alert from "../../components/Alert";
 
 export type SwapRouteParams = {
   swap: SwapDataType,
@@ -349,6 +350,11 @@ function SwapForm({
             </View>
           ) : null}
         </View>
+        {decentralizedSwapAvailable ? (
+          <Alert>
+            <LText style={styles.maxLabel}>test</LText>
+          </Alert>
+        ) : null}
         <View style={styles.buttonContainer}>
           <Button
             containerStyle={styles.button}
