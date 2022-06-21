@@ -138,14 +138,16 @@ export default class StepSummary extends PureComponent<StepProps> {
           </Box>
           <Separator />
           {memo && (
-            <Box horizontal justifyContent="space-between" mb={2}>
-              <Text ff="Inter|Medium" color="palette.text.shade40" fontSize={4}>
-                <Trans i18nKey="operationDetails.extra.memo" />
-              </Text>
-              <Text ff="Inter|Medium" fontSize={4}>
-                {memo}
-              </Text>
-            </Box>
+              <Box horizontal alignItems="center" mb={2}>
+                <Text ff="Inter|Medium" color="palette.text.shade40" fontSize={4}>
+                  <Trans i18nKey="operationDetails.extra.memo" />
+                </Text>
+                <Ellipsis ml={2}>
+                  <Text ff="Inter|Medium" fontSize={4}>
+                    {memo}
+                  </Text>
+                </Ellipsis>
+              </Box>
           )}
           {!isNFTSend ? (
             <Box horizontal justifyContent="space-between" mb={2}>
