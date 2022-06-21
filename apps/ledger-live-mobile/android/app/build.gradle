@@ -244,6 +244,9 @@ dependencies {
 
     androidTestImplementation('com.wix:detox:+')
 
+    implementation (project(path:':storyly-react-native')) {
+        exclude(group: "com.google.android.exoplayer")
+    }
     compile project(':react-native-video')
 
     implementation "androidx.appcompat:appcompat:1.0.0"
