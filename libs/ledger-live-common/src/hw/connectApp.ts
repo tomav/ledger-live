@@ -1,6 +1,13 @@
 import semver from "semver";
 import { Observable, concat, from, of, throwError, defer, merge } from "rxjs";
-import { mergeMap, concatMap, map, catchError, delay } from "rxjs/operators";
+import {
+  mergeMap,
+  concatMap,
+  map,
+  catchError,
+  delay,
+  exhaustMap,
+} from "rxjs/operators";
 import {
   TransportStatusError,
   FirmwareOrAppUpdateRequired,
@@ -27,6 +34,7 @@ import quitApp from "./quitApp";
 import { LatestFirmwareVersionRequired } from "../errors";
 import { mustUpgrade } from "../apps";
 import manager from "../manager";
+import getVersion from "./getVersion";
 
 export type RequiresDerivation = {
   currencyId: string;
@@ -263,7 +271,8 @@ const cmd = ({
           dependencies,
           requireLatestFirmware,
         }: any) =>
-          defer(() => from(getAppAndVersion(transport))).pipe(
+          defer(() => from(getVersion(transport))).pipe(
+            exhaustMap(() => from(getAppAndVersion(transport))),
             concatMap((appAndVersion): Observable<ConnectAppEvent> => {
               timeoutSub.unsubscribe();
 
