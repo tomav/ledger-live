@@ -2,6 +2,7 @@
 import React, { useCallback, useMemo, useState, memo } from "react";
 import { useSelector } from "react-redux";
 import { FlatList, LayoutChangeEvent } from "react-native";
+import { Storyly } from "storyly-react-native";
 import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
@@ -25,6 +26,7 @@ import {
   discreetModeSelector,
   counterValueCurrencySelector,
   carouselVisibilitySelector,
+  languageSelector,
 } from "../../reducers/settings";
 import { usePortfolio } from "../../actions/portfolio";
 import globalSyncRefreshControl from "../../components/globalSyncRefreshControl";
@@ -178,6 +180,11 @@ function PortfolioScreen({ navigation }: Props) {
     [accounts],
   );
 
+  const storylyToken =
+    useSelector(languageSelector) === "fr"
+    ? "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2NfaWQiOjY5NDgsImFwcF9pZCI6MTE0MjIsImluc19pZCI6MTIyMDV9._K95dmyom4OkPKu5ENv62n2nsHo-fM_fvrP9GHc8YJc"
+    : "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2NfaWQiOjY5NDgsImFwcF9pZCI6MTE0MjIsImluc19pZCI6MTIxOTh9.XqNitheri5VPDqebtA4JFu1VucVOHYlryki2TqCb1DQ";
+
   const data = useMemo(
     () => [
       !showAssets && (
@@ -301,6 +308,25 @@ function PortfolioScreen({ navigation }: Props) {
             hidePortfolio={areAccountsEmpty}
           />
         </Box>
+        <Storyly
+          style={{ width: "100%", height: 120 }}
+          ref={ref => {
+            this.storyly = ref;
+          }}
+          onLoad={storyGroupList => console.log("[Storyly] onLoad")}
+          onFail={errorMessage => console.log("[Storyly] onFail")}
+          onStoryOpen={() => console.log("[Storyly] onStoryOpen")}
+          onStoryClose={() => console.log("[Storyly] onStoryClose")}
+          onPress={story => console.log("[Storyly] onPress")}
+          onEvent={eventPayload =>
+            console.log(
+              "[Storyly] onEvent",
+              JSON.stringify(eventPayload, null, 2),
+            )
+          }
+          onUserInteracted={console.log("[Storyly] onStoryUserInteracted")}
+          storylyId={storylyToken}
+        />
         <Flex px={6} py={4}>
           <FirmwareUpdateBanner />
         </Flex>

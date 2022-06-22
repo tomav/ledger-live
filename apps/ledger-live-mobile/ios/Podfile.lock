@@ -156,6 +156,8 @@ PODS:
   - PasscodeAuth (2.1.0):
     - React
   - PromisesObjC (2.1.0)
+  - PromisesSwift (2.1.0):
+    - PromisesObjC (= 2.1.0)
   - RCT-Folly (2021.06.28.00-v2):
     - boost
     - DoubleConversion
@@ -422,10 +424,11 @@ PODS:
     - React-Core
   - react-native-version-number (0.3.6):
     - React
-  - react-native-video (5.2.0):
+  - react-native-video (6.0.0-alpha.1):
     - React-Core
-    - react-native-video/Video (= 5.2.0)
-  - react-native-video/Video (5.2.0):
+    - react-native-video/Video (= 6.0.0-alpha.1)
+  - react-native-video/Video (6.0.0-alpha.1):
+    - PromisesSwift
     - React-Core
   - react-native-webview (11.18.2):
     - React-Core
@@ -573,6 +576,10 @@ PODS:
     - Sentry/Core (= 7.11.0)
   - Sentry/Core (7.11.0)
   - SocketRocket (0.6.0)
+  - Storyly (1.23.2)
+  - storyly-react-native (1.23.2):
+    - React
+    - Storyly (~> 1.23.0)
   - TcpSockets (4.0.0):
     - React
   - Yoga (1.14.0)
@@ -652,7 +659,7 @@ DEPENDENCIES:
   - "react-native-text-input-mask (from `../../../node_modules/.pnpm/react-native-text-input-mask@3.1.4_react-native@0.68.2/node_modules/react-native-text-input-mask`)"
   - "react-native-udp (from `../../../node_modules/.pnpm/react-native-udp@4.1.5/node_modules/react-native-udp`)"
   - "react-native-version-number (from `../../../node_modules/.pnpm/react-native-version-number@0.3.6/node_modules/react-native-version-number`)"
-  - "react-native-video (from `../../../node_modules/.pnpm/react-native-video@5.2.0/node_modules/react-native-video`)"
+  - "react-native-video (from `../../../node_modules/.pnpm/react-native-video@6.0.0-alpha.1/node_modules/react-native-video`)"
   - "react-native-webview (from `../../../node_modules/.pnpm/react-native-webview@11.18.2_zqxy7fpkavjkgz5xll7ed4r6rq/node_modules/react-native-webview`)"
   - "React-perflogger (from `../../../node_modules/.pnpm/react-native@0.68.2_shn3lkepuadv4od4dudas6ijbq/node_modules/react-native/ReactCommon/reactperflogger`)"
   - "React-RCTActionSheet (from `../../../node_modules/.pnpm/react-native@0.68.2_shn3lkepuadv4od4dudas6ijbq/node_modules/react-native/Libraries/ActionSheetIOS`)"
@@ -684,6 +691,7 @@ DEPENDENCIES:
   - "RNShare (from `../../../node_modules/.pnpm/react-native-share@6.5.0/node_modules/react-native-share`)"
   - "RNSVG (from `../../../node_modules/.pnpm/react-native-svg@12.3.0_zqxy7fpkavjkgz5xll7ed4r6rq/node_modules/react-native-svg`)"
   - "RNVectorIcons (from `../../../node_modules/.pnpm/react-native-vector-icons@8.1.0/node_modules/react-native-vector-icons`)"
+  - "storyly-react-native (from `../../../node_modules/.pnpm/storyly-react-native@1.23.2_zqxy7fpkavjkgz5xll7ed4r6rq/node_modules/storyly-react-native`)"
   - "TcpSockets (from `../../../node_modules/.pnpm/react-native-tcp@4.0.0_react-native@0.68.2/node_modules/react-native-tcp`)"
   - "Yoga (from `../../../node_modules/.pnpm/react-native@0.68.2_shn3lkepuadv4od4dudas6ijbq/node_modules/react-native/ReactCommon/yoga`)"
 
@@ -718,10 +726,12 @@ SPEC REPOS:
     - nanopb
     - OpenSSL-Universal
     - PromisesObjC
+    - PromisesSwift
     - SDWebImage
     - SDWebImageWebPCoder
     - Sentry
     - SocketRocket
+    - Storyly
     - YogaKit
     - ZXingObjC
 
@@ -809,7 +819,7 @@ EXTERNAL SOURCES:
   react-native-version-number:
     :path: "../../../node_modules/.pnpm/react-native-version-number@0.3.6/node_modules/react-native-version-number"
   react-native-video:
-    :path: "../../../node_modules/.pnpm/react-native-video@5.2.0/node_modules/react-native-video"
+    :path: "../../../node_modules/.pnpm/react-native-video@6.0.0-alpha.1/node_modules/react-native-video"
   react-native-webview:
     :path: "../../../node_modules/.pnpm/react-native-webview@11.18.2_zqxy7fpkavjkgz5xll7ed4r6rq/node_modules/react-native-webview"
   React-perflogger:
@@ -872,6 +882,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/.pnpm/react-native-svg@12.3.0_zqxy7fpkavjkgz5xll7ed4r6rq/node_modules/react-native-svg"
   RNVectorIcons:
     :path: "../../../node_modules/.pnpm/react-native-vector-icons@8.1.0/node_modules/react-native-vector-icons"
+  storyly-react-native:
+    :path: "../../../node_modules/.pnpm/storyly-react-native@1.23.2_zqxy7fpkavjkgz5xll7ed4r6rq/node_modules/storyly-react-native"
   TcpSockets:
     :path: "../../../node_modules/.pnpm/react-native-tcp@4.0.0_react-native@0.68.2/node_modules/react-native-tcp"
   Yoga:
@@ -920,6 +932,7 @@ SPEC CHECKSUMS:
   OpenSSL-Universal: ebc357f1e6bc71fa463ccb2fe676756aff50e88c
   PasscodeAuth: 667f2bfb0e78f652c11db4793d8077c189ce300e
   PromisesObjC: 99b6f43f9e1044bd87a95a60beff28c2c44ddb72
+  PromisesSwift: b39b85b2e2e2146b97f357500395117a6e5415a8
   RCT-Folly: 803a9cfd78114b2ec0f140cfa6fa2a6bafb2d685
   RCTRequired: 3e917ea5377751094f38145fdece525aa90545a0
   RCTTypeSafety: c43c072a4bd60feb49a9570b0517892b4305c45e
@@ -948,7 +961,7 @@ SPEC CHECKSUMS:
   react-native-text-input-mask: 36a546b378fadd2efe1b7484a859d34bc2c80395
   react-native-udp: 8864b1211857e9d8224ae5cbaf8580970fb99de1
   react-native-version-number: b415bbec6a13f2df62bf978e85bc0d699462f37f
-  react-native-video: a4c2635d0802f983594b7057e1bce8f442f0ad28
+  react-native-video: bb6f12a7198db53b261fefb5d609dc77417acc8b
   react-native-webview: 8ec7ddf9eb4ddcd92b32cee7907efec19a9ec7cb
   React-perflogger: a18b4f0bd933b8b24ecf9f3c54f9bf65180f3fe6
   React-RCTActionSheet: 547fe42fdb4b6089598d79f8e1d855d7c23e2162
@@ -984,6 +997,8 @@ SPEC CHECKSUMS:
   SDWebImageWebPCoder: f93010f3f6c031e2f8fb3081ca4ee6966c539815
   Sentry: 0c5cd63d714187b4a39c331c1f0eb04ba7868341
   SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
+  Storyly: f4218f5e4ff820e58e0bb7f78c86a9401265e266
+  storyly-react-native: 84ec6752fd86ce69a1aedd2800a05e151dfdc90c
   TcpSockets: 4ef55305239923b343ed0a378b1fac188b1373b0
   Yoga: 99652481fcd320aefa4a7ef90095b95acd181952
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
