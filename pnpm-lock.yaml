@@ -582,7 +582,7 @@ importers:
       local-web-server: ^4.2.1
       lodash: 4.17.21
       lottie-ios: 3.2.3
-      lottie-react-native: ^4.1.3
+      lottie-react-native: ^5.1.3
       lru-cache: ^6.0.0
       metro: ^0.67.0
       metro-extra-config: workspace:*
@@ -744,7 +744,7 @@ importers:
       json-rpc-2.0: 0.2.19
       lodash: 4.17.21
       lottie-ios: 3.2.3
-      lottie-react-native: 4.1.3_kudd2ybslvnlycdin3ykfqrgrm
+      lottie-react-native: 5.1.3_kudd2ybslvnlycdin3ykfqrgrm
       lru-cache: 6.0.0
       node-libs-react-native: 1.2.1
       numeral: 2.0.6
@@ -24366,7 +24366,7 @@ packages:
     dev: true
 
   /dedent/0.6.0:
-    resolution: {integrity: sha1-Dm2o8M5Sg471zsXI+TlrDBtko8s=}
+    resolution: {integrity: sha512-cSfRWjXJtZQeRuZGVvDrJroCR5V2UvBNUMHsPCdNYzuAG8b9V8aAy3KUcdQrGQPXs17Y+ojbPh1aOCplg9YR9g==}
     dev: false
 
   /dedent/0.7.0:
@@ -36429,8 +36429,8 @@ packages:
     resolution: {integrity: sha512-mubYMN6+1HXa8z3EJKBvNBkl4UoVM4McjESeB2PgvRMSngmJtC5yUMRdhbbrIAn5Liu3hFGao/14s5hQIgtkRQ==}
     dev: false
 
-  /lottie-react-native/4.1.3_kudd2ybslvnlycdin3ykfqrgrm:
-    resolution: {integrity: sha512-RgQrn1VYRXMV3YTZE9DgZy/UqNsMmZvzXBU4eEUWDOTY9cemOoWmCg2BHrL7nNtDJqtsu1Mi/6e8hp0yN2mcBA==}
+  /lottie-react-native/5.1.3_kudd2ybslvnlycdin3ykfqrgrm:
+    resolution: {integrity: sha512-Ho+oM+D3if85I2EBn8c17tcg7pc880Sp/DOeNW5aWiNtlCJKX/kmlhoM19NLqjzkHEm96fTkTcTy82ZwYU3Kbg==}
     peerDependencies:
       lottie-ios: ^3.2.3
       react: '*'
@@ -36438,7 +36438,6 @@ packages:
     dependencies:
       invariant: 2.2.4
       lottie-ios: 3.2.3
-      prop-types: 15.8.1
       react: 17.0.2
       react-native: 0.68.2_shn3lkepuadv4od4dudas6ijbq
       react-native-safe-modules: 1.0.3_react-native@0.68.2
