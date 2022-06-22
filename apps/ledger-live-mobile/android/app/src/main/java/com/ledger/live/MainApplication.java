@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Build;
 
-import com.brentvatne.react.ReactVideoPackage;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactInstanceManager;
@@ -55,7 +54,6 @@ public class MainApplication extends Application implements ReactApplication {
           @SuppressWarnings("UnnecessaryLocalVariable")
           List<ReactPackage> packages = new PackageList(this).getPackages();
           packages.add(new BluetoothHelperPackage());
-          packages.add(new ReactVideoPackage());
           packages.add(new BackgroundRunnerPackager());
           return packages;
         }
