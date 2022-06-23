@@ -19,9 +19,6 @@ class Queue: NSObject  {
     var runner : Runner?                        /// Handler of the current task
     var pendingRequest: URLSessionDataTask?     /// Backend request to unpack a token
 
-    var onEvent: ((Action, ExtraData?)->Void)?
-    var onDone: ((String, String)->Void)?
-
     var token: String = ""                      /// Tokenized representation of our queue
     var index: Int = 0                          /// Current index on the queue
     var item: Item?                             /// Current item we are processing
@@ -30,15 +27,10 @@ class Queue: NSObject  {
     var stopped: Bool = false
 
     public init (
-        token: String,
-        onEvent: @escaping ((Action, ExtraData?)->Void),
-        onDone: ((String, String)->Void)?
+        token: String
     ) {
         self.token = token
         super.init()
-
-        self.onEvent = onEvent
-        self.onDone = onDone
         self.resolveQueueFromToken(true)
     }
     
@@ -74,7 +66,8 @@ class Queue: NSObject  {
         if let task = self.pendingRequest {
             task.cancel()
         }
-// TODO add error handling if BIM is down
+
+        /// Pending error handling if backend is toast.
         self.pendingRequest = session.dataTask(with: request) { (data, response, error) in
             if let jsonData = data {
                 do {
@@ -112,9 +105,11 @@ class Queue: NSObject  {
         self.item = self.tasks.tasks[self.index]
         if let item = self.item {
             EventEmitter.sharedInstance.dispatch(
-                event: Event.task,
-                type: "runStart",
-                data: ExtraData(name: item.appName, type: item.operation)
+                Payload(
+                    event: Event.task.rawValue,
+                    type: "runStart",
+                    data: ExtraData(name: item.appName, type: item.operation)
+                )
             )
 
             self.runner = Runner(
@@ -141,9 +136,11 @@ class Queue: NSObject  {
             wrappedData.type = item.operation
 
             EventEmitter.sharedInstance.dispatch(
-                event: Event.task,
-                type: "runProgress",
-                data: wrappedData
+                Payload(
+                    event: Event.task.rawValue,
+                    type: "runProgress",
+                    data: wrappedData
+                )
             )
         }
     }
@@ -157,9 +154,11 @@ class Queue: NSObject  {
     private func onDoneWrapper (disconnectReason: String, doneMessage : String) -> Void {
         if let item = self.item {
             EventEmitter.sharedInstance.dispatch(
-                event: Event.task,
-                type: "runSuccess",
-                data: ExtraData(name: item.appName, type: item.operation)
+                Payload(
+                    event: Event.task.rawValue,
+                    type: "runSuccess",
+                    data: ExtraData(name: item.appName, type: item.operation)
+                )
             )
             if self.stopped { return }
 
@@ -173,12 +172,24 @@ class Queue: NSObject  {
             } else {
                 self.runner = nil
                 EventEmitter.sharedInstance.dispatch(
-                    event: Event.task,
-                    type: "runCompleted",
-                    data: ExtraData()
+                    Payload(
+                        event: Event.task.rawValue,
+                        type: "runCompleted",
+                        data: ExtraData()
+                    )
                 )
-                self.onDone!(disconnectReason, doneMessage)
             }
         }
+    }
+    
+    public func onDisconnect(_ code: String, _ message: String, _ error: NSError?) -> Void {
+        self.stop({ }) /// Empty because it's a dirty disconenct
+        EventEmitter.sharedInstance.dispatch(
+            Payload(
+                event: Event.task.rawValue,
+                type: "runError",
+                data: ExtraData(code: code, message: message)
+            )
+        )
     }
 }

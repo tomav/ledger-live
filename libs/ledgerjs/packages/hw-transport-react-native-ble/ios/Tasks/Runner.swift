@@ -64,10 +64,11 @@ class Runner: NSObject  {
         self.stopped = true
         socket?.disconnect()
 
-        if self.APDUQueue.count > 0 && self.isInBulkMode {
+        if self.APDUQueue.count > 0 && self.isInBulkMode && BleTransport.shared.isConnected {
             self.onStop = onStop
             self.APDUQueue = [
-                APDU(raw: "e00000001eed04c62fde5006534e14e7f339b2a55262bb118e41f552912179ac3445d0"),
+                APDU(raw: "e0d800000120"),
+                APDU(raw: "b001000000"),
             ]
         } else {
             onStop()
@@ -95,8 +96,10 @@ class Runner: NSObject  {
     
     private func startScriptRunner() -> Void {
         var request = URLRequest(url: self.endpoint)
-        request.timeoutInterval = 20 // No idea if we need this much
+        request.timeoutInterval = 60 // No idea if we need this much
+
         socket = WebSocket(request: request)
+        print("BIM opening \(self.endpoint)")
         socket!.connect()
         socket!.onEvent = { event in
             switch event {
@@ -123,6 +126,7 @@ class Runner: NSObject  {
                 let data = Data(msg.utf8)
                 do {
                     if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                        print("BIM <- \(json)")
                         let query = json["query"] as? String;
                         if (query == "bulk") {
                             let rawAPDUs = json["data"] as? [String] ?? []
@@ -145,6 +149,7 @@ class Runner: NSObject  {
                 }
                 break
             default:
+                print("BIM ws \(event)")
                 break
             }
         }
@@ -188,6 +193,7 @@ class Runner: NSObject  {
                     // Send message back to the script runner
                     // Probably a good idea to move this to an encoded string
                     let response = "{\"nonce\":\(self.HSMNonce),\"response\":\"success\",\"data\":\"\(data)\"}"
+                    print("BIM -> \(response)")
                     self.socket!.write(string: response)
                 }
             }

@@ -30,21 +30,12 @@ enum Action: String, CaseIterable {
     case bulkProgress = "bulk-progress"
 }
 
-enum TransportError: String, CaseIterable {
-    case bluetoothRequired = "bluetooth-required"
-    case deviceAlreadyConnected = "device-already-connected"
-    case deviceDisconnected = "device-disconnected"
-    case cantOpenDevice = "cant-open-device"
-    case pairingFailed = "pairingFailed"
-    case userPendingAction = "userPendingAction"
-    case writeError = "writeError"
-    case unknownError = "unknownError"
-}
+
 
 /// Event payloads
 struct Payload: Codable {
     let event: String
-    let type: String
+    var type: String
     let data: ExtraData?
 }
 
@@ -73,6 +64,10 @@ struct ExtraData: Codable {
     /// Queue action extras
     var queueItem: Int?
     var type: String?
+    
+    /// Error extras
+    var code: String?
+    var message: String?
 }
 
 class EventEmitter {
@@ -102,19 +97,17 @@ class EventEmitter {
         }
     }
     
-    func dispatch(event: Event, type: String, data: ExtraData?) {
-        let newPayload = Payload(event: event.rawValue, type: type, data: data)
-        
+    func dispatch(_ payload: Payload) {
         if self.queuedEvents.count > 0 {
             let previousLog = self.queuedEvents.last
-            if previousLog?.type == newPayload.type
-            && previousLog?.event == newPayload.event {
-                self.queuedEvents[self.queuedEvents.count-1] = newPayload
+            if previousLog?.type == payload.type
+            && previousLog?.event == payload.event {
+                self.queuedEvents[self.queuedEvents.count-1] = payload
                 self.consumeEventQueue()
                 return
             }
         }
-        self.queuedEvents.append(newPayload)
+        self.queuedEvents.append(payload)
         self.consumeEventQueue()
     }
     
@@ -135,14 +128,17 @@ class EventEmitter {
                 let payload = String(data: encodedData, encoding: .utf8)
 
                 let exec: () -> Void = {
-                    self.eventEmitter.sendEvent(withName:Event.parent.rawValue, body: payload)
-                    self.lastEventType = event.type
-                    self.lastEventTime = Date().timeIntervalSince1970
-                    
-                    if self.pendingEvent != nil {
-                        self.pendingEvent.cancel()
-                        self.pendingEvent = nil
+                    if let payload = payload {
+                        self.eventEmitter.sendEvent(withName:Event.parent.rawValue, body: payload)
+                        self.lastEventType = event.type
+                        self.lastEventTime = Date().timeIntervalSince1970
+
+                        if self.pendingEvent != nil {
+                          self.pendingEvent.cancel()
+                          self.pendingEvent = nil
+                        }
                     }
+//
                 }
                 
                 /// There's a scheduled event of the same type, replace it with this one

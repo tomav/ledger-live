@@ -1,6 +1,5 @@
 import { useMemo, useCallback, useRef, useState, useEffect } from "react";
 import { Subject } from "rxjs";
-import { map } from "rxjs/operators";
 import type { State } from "./types";
 import { withDevice } from "../hw/deviceAccess";
 import BIM from "../api/BIM";
@@ -41,7 +40,7 @@ const useBackgroundInstallSubject = (
     lastSeenQueueSize.current = queueSize;
   }, [queueSize, setToken, state]);
 
-  const cleanUp = useCallback(()=>{
+  const cleanUp = useCallback(() => {
     setToken(undefined);
     setPendingTransport(false);
     setTransport(undefined);
@@ -58,7 +57,7 @@ const useBackgroundInstallSubject = (
         return observable.current;
       }).subscribe({
         next: onEventDispatch,
-        error: error => {
+        error: (error) => {
           cleanUp();
           onEventDispatch({
             type: "runError",
@@ -71,13 +70,13 @@ const useBackgroundInstallSubject = (
     }
 
     return () => {
-      sub?.unsubscribe()
-    }
-  }, []);
+      sub?.unsubscribe();
+    };
+  }, [cleanUp, deviceId, onEventDispatch]);
 
   useEffect(() => {
-    if (shouldStartNewJob) startNewJob()
-  }, [deviceId, shouldStartNewJob, onEventDispatch]);
+    if (shouldStartNewJob) startNewJob();
+  }, [deviceId, shouldStartNewJob, onEventDispatch, startNewJob]);
 
   useEffect(() => {
     if (!token || !transport) return;

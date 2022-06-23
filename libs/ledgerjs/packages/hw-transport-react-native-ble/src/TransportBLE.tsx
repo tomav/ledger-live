@@ -63,6 +63,7 @@ class Ble extends Transport {
   // TODO this seems to be going to leak since we never stop listening
   static listener = EventEmitter?.addListener("BleTransport", (rawEvent) => {
     const { event, type, data } = JSON.parse(rawEvent);
+    console.log("raw", rawEvent, !!Ble.queueObserver);
     if (event === "new-device") {
       Ble.scanObserver?.next({
         type: "add",
@@ -76,6 +77,13 @@ class Ble extends Transport {
       if (Ble.queueObserver) {
         if (type === "runCompleted") {
           // we've completed a queue, complete the subject
+          Ble.queueObserver.complete();
+        } else if (type === "runError") {
+          Ble.queueObserver.next({
+            type: "runError",
+            appOp: {}, //Fixme?
+            error: Ble.remapError(data.code),
+          });
           Ble.queueObserver.complete();
         } else {
           const progress = Math.round((data?.progress || 0) * 100) / 100;
@@ -128,11 +136,10 @@ class Ble extends Transport {
       if (Ble.queueObserver) {
         Ble.queueObserver.next({
           type: "runError",
-          event: {
-            appOp: {}, //Fixme?
-            error: Ble.remapError(error, { uuid }),
-          },
+          appOp: {}, //Fixme?
+          error: Ble.remapError(error, { uuid }),
         });
+        Ble.queueObserver.complete();
       } else {
         throw Ble.remapError(error, { uuid });
       }
