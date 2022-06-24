@@ -29,6 +29,20 @@ class HwTransportReactNativeBle: RCTEventEmitter {
         super.init()
         print(BleTransport.shared)
         EventEmitter.sharedInstance.registerEventEmitter(eventEmitter: self)
+        
+        
+    }
+
+    @objc func observeBluetooth() -> Void {
+        BleTransport.shared.bluetoothAvailabilityCallback { available in
+            EventEmitter.sharedInstance.dispatch(
+                Payload(
+                    event: Event.status.rawValue,
+                    type: available ? "PoweredOn" : "PoweredOff",
+                    data: nil
+                )
+            )
+        }
     }
     
     @objc func listen(

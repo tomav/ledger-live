@@ -17,10 +17,13 @@ import EventEmitter from "./EventEmitter";
 const NativeBle = NativeModules.HwTransportReactNativeBle;
 
 let instances: Array<Ble> = [];
+type RunnerEvent = any; // Can't depend on live-common for this, TODO get it from types package
+
 class Ble extends Transport {
   static id = "TransportBle";
   static scanObserver: Observer<DescriptorEvent<unknown>>;
-  static queueObserver: Observer<any>;
+  static stateObserver: Observer<{ type: string }>;
+  static queueObserver: Observer<RunnerEvent>;
 
   appStateSubscription: EventSubscription;
   appState: "background" | "active" | "inactive" | "" = "";
@@ -60,6 +63,19 @@ class Ble extends Transport {
     }
   };
 
+  static observeState = (
+    observer: Observer<{ type: string }>
+  ): Subscription => {
+    Ble.stateObserver = observer;
+    NativeBle.observeBluetooth();
+
+    return {
+      unsubscribe: () => {
+        observer.complete;
+      },
+    };
+  };
+
   // TODO this seems to be going to leak since we never stop listening
   static listener = EventEmitter?.addListener("BleTransport", (rawEvent) => {
     const { event, type, data } = JSON.parse(rawEvent);
@@ -72,6 +88,12 @@ class Ble extends Transport {
           serviceUUIDs: [data.service],
         },
       });
+    } else if (event === "status") {
+      if (Ble.stateObserver) {
+        Ble.stateObserver.next({
+          type,
+        });
+      }
     } else if (event === "task") {
       if (Ble.queueObserver) {
         if (type === "runCompleted") {

@@ -4,6 +4,7 @@
 
 import React, { Component } from "react";
 import { Observable } from "rxjs";
+import BluetoothTransport from "@ledgerhq/hw-transport-react-native-ble";
 import RequiresLocationOnAndroid from "./RequiresLocationOnAndroid";
 import BluetoothDisabled from "./BluetoothDisabled";
 
@@ -23,13 +24,13 @@ class RequiresBLE extends Component<Props, State> {
   sub: *;
 
   componentDidMount() {
-    // this.sub = Observable.create(TransportBLE.observeState).subscribe({
-    //   next: ({ type }) => this.setState({ type }),
-    // });
+    this.sub = Observable.create(BluetoothTransport.observeState).subscribe({
+      next: ({ type }) => this.setState({ type }),
+    });
   }
 
   componentWillUnmount() {
-    // this.sub.unsubscribe();
+    this.sub.unsubscribe();
   }
 
   render() {
@@ -44,8 +45,6 @@ class RequiresBLE extends Component<Props, State> {
 }
 
 export default function RequiresBLEWrapped({ children }: *) {
-  // FIXME BIM, we need to use this from the new transport.
-  return children;
   return (
     <RequiresLocationOnAndroid>
       <RequiresBLE>{children}</RequiresBLE>
