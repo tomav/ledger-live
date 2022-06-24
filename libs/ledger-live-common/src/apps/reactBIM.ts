@@ -28,7 +28,13 @@ const useBackgroundInstallSubject = (
   useEffect(() => {
     async function fetchToken() {
       const queue = BIM.buildQueueFromState(state);
-      const token = await BIM.getTokenFromQueue(queue);
+      const token = await BIM.getTokenFromQueue(queue).catch((error) => {
+        onEventDispatch({
+          type: "runError",
+          appOp: {},
+          error,
+        });
+      });
       setToken(token);
     }
 
@@ -38,7 +44,7 @@ const useBackgroundInstallSubject = (
     }
     // Always update the last seen
     lastSeenQueueSize.current = queueSize;
-  }, [queueSize, setToken, state]);
+  }, [onEventDispatch, queueSize, setToken, state]);
 
   const cleanUp = useCallback(() => {
     setToken(undefined);

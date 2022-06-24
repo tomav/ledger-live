@@ -63,7 +63,6 @@ class Ble extends Transport {
   // TODO this seems to be going to leak since we never stop listening
   static listener = EventEmitter?.addListener("BleTransport", (rawEvent) => {
     const { event, type, data } = JSON.parse(rawEvent);
-    console.log("raw", rawEvent, !!Ble.queueObserver);
     if (event === "new-device") {
       Ble.scanObserver?.next({
         type: "add",

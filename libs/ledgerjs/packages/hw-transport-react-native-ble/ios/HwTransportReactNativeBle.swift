@@ -160,8 +160,8 @@ class HwTransportReactNativeBle: RCTEventEmitter {
                     resolve(response)
                 case .failure(let error):
                     switch error {
-                    case .writeError(let description):
-                        reject(TransportError.writeError.rawValue, String(describing:description), nil)
+                    case .writeError(let error):
+                        reject(TransportError.writeError.rawValue, String(describing:error), nil)
                     case .pendingActionOnDevice:
                         reject(TransportError.userPendingAction.rawValue, "", nil)
                     default:

@@ -12,7 +12,7 @@ import BleTransport
 class Runner: NSObject  {
     var endpoint : URL
     
-    var onEmit: ((Action, ExtraData?)->Void)?
+    var onEmit: ((RunnerAction, ExtraData?)->Void)?
     var onDone: ((String, String)->Void)?
     var onStop: (()->Void)?
     var initialMessage: String = ""
@@ -37,7 +37,7 @@ class Runner: NSObject  {
 
     convenience init (
         endpoint : URL,
-        onEvent: @escaping ((Action, ExtraData?)->Void),
+        onEvent: @escaping ((RunnerAction, ExtraData?)->Void),
         onDone: ((String, String)->Void)?,
         withInitialMessage: String
     ) {
@@ -47,7 +47,7 @@ class Runner: NSObject  {
     
     public init (
         endpoint : URL,
-        onEvent: @escaping ((Action, ExtraData?)->Void),
+        onEvent: @escaping ((RunnerAction, ExtraData?)->Void),
         onDone: ((String, String)->Void)?
     ) {
         self.endpoint = endpoint
@@ -75,23 +75,15 @@ class Runner: NSObject  {
         }
     }
     
-    /// Based on the apdu in/out we can infer some events that we need to emit up to javascript. Not all exchanges need an event.
-    private func maybeEmitEvent(_ apdu : String, fromHSM: Bool = true) {
-        if fromHSM && apdu.starts(with: "e051") {
-            self.isUserBlocked = true
-            self.onEmit!(Action.permissionRequested, nil)
-        } else if !fromHSM && self.isUserBlocked {
-            self.isUserBlocked = false
-            if apdu.suffix(4) == "9000" {
-                self.onEmit!(Action.permissionGranted, nil)
-            } else {
-                self.onEmit!(Action.permissionRefused, nil)
-            }
-        } else if self.isInBulkMode {
+    /// Based on the apdu in/out we could infer some events that we need to emit up to javascript. Not all exchanges need an event.
+    private func onEventFromAPDU(_ apdu : String, fromHSM: Bool = true) {
+        if self.isInBulkMode {
             let progress = ((Double(self.APDUMaxCount-self.APDUQueue.count))/Double(self.APDUMaxCount))
-            self.onEmit!(Action.bulkProgress, ExtraData(progress: progress))
+            self.onEmit!(
+                RunnerAction.runProgress,
+                ExtraData(progress: progress)
+            )
         }
-        
     }
     
     private func startScriptRunner() -> Void {
@@ -120,10 +112,25 @@ class Runner: NSObject  {
                     self.pendingOnDone = true
                 }
                 break
-            case .text(let msg):
-                self.lastScriptRunnerMessage = msg
+            case .text(let message):
+                self.lastScriptRunnerMessage = message
                 // Receive a message from the scriptrunner
-                let data = Data(msg.utf8)
+                let data = Data(message.utf8)
+
+                if ["CONTINUE", "TERMINATE"].contains(message) { return } /// OK cases
+                else if[                                                  /// KO cases
+                    "CANCELLED",
+                    "SR DISCONNECTION",
+                    "INDEX OUT OF BOUNDS",
+                    "NOT CONNECTED TO SCRIPT RUNNER"
+                ].contains(message) {
+                    self.onEmit!(
+                        RunnerAction.runError,
+                        ExtraData(message: message)
+                    )
+                    return
+                }
+
                 do {
                     if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                         print("BIM <- \(json)")
@@ -145,7 +152,10 @@ class Runner: NSObject  {
                         self.handleNextAPDU();
                     }
                 } catch {
-                    print("Failed to load: \(error.localizedDescription)")
+                    self.onEmit!(
+                        RunnerAction.runError,
+                        ExtraData(message: error.localizedDescription)
+                    )
                 }
                 break
             default:
@@ -162,7 +172,7 @@ class Runner: NSObject  {
             /// response, we follow that with a getAppAndVersion apdu which also fails. Then we can disconnect.
             if self.APDUQueue.count > 0 {
                 let apdu = self.APDUQueue.removeFirst()
-                self.maybeEmitEvent((apdu.data.hexEncodedString()))
+                self.onEventFromAPDU((apdu.data.hexEncodedString()))
                 BleTransport.shared.exchange(apdu: apdu) { _ in
                     self.handleNextAPDU()
                 }
@@ -171,7 +181,7 @@ class Runner: NSObject  {
             }
         } else if !self.APDUQueue.isEmpty {
             let apdu = self.APDUQueue.removeFirst()
-            self.maybeEmitEvent((apdu.data.hexEncodedString()))
+            self.onEventFromAPDU((apdu.data.hexEncodedString()))
             BleTransport.shared.exchange(apdu: apdu, callback: self.onDeviceResponse)
         } else if self.pendingOnDone {
             /// We don't have pending apdus, and we have gone past a bulk payload, we can emit the disconnect
@@ -185,7 +195,7 @@ class Runner: NSObject  {
             let status = response.suffix(4)
             let data = response.dropLast(4)
             
-            self.maybeEmitEvent(response, fromHSM: false)
+            self.onEventFromAPDU(response, fromHSM: false)
             if (status == "9000") {
                 if (self.isInBulkMode) {
                     self.handleNextAPDU()
@@ -198,13 +208,7 @@ class Runner: NSObject  {
                 }
             }
         case .failure(let error):
-            print(error)
+            print(error) /// Disconnects are handled elsewhere
         }
     }
-}
-
-struct HSMResponse: Codable {
-    let nonce: Int
-    let response: String
-    let data: String
 }

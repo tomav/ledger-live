@@ -30,8 +30,6 @@ function buildQueueFromState(state: State): Array<Item> {
     liveCommonVersion,
   }));
 
-  console.log("BIMBIM new queue", actionPlan);
-
   return queue;
 }
 

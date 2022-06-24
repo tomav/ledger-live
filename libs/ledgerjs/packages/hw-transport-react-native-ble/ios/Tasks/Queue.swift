@@ -14,7 +14,8 @@ import BleTransport
 /// needing to resolve the scriptrunner url for each one of them (we have it already on Live side, ok, fair enough)
 /// while at the same time breaking the dependency with the JS thread, this is the highlight, yes.
 class Queue: NSObject  {
-    let BIMWebsocketEndpoint : String = "wss://bim.aws.stg.ldg-tech.com/ws/channel"
+    let BIMWebsocketEndpoint = URL(string: "wss://bim.aws.stg.ldg-tech.com/ws/channel")!
+    let BIMUnpackQueue = URL(string: "https://bim.aws.stg.ldg-tech.com/unpacked-queue")!
 
     var runner : Runner?                        /// Handler of the current task
     var pendingRequest: URLSessionDataTask?     /// Backend request to unpack a token
@@ -56,8 +57,7 @@ class Queue: NSObject  {
     /// queue directly but this was deemed like a good compromise. In any case, it means we resolve the data to
     /// be able to notify the UI of our progress as it unfolds.
     private func resolveQueueFromToken(_ autoStart: Bool) {
-        let url = URL(string: "https://bim.aws.stg.ldg-tech.com/unpacked-queue")!
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: BIMUnpackQueue)
         request.httpMethod = "GET"
         request.addValue(self.token, forHTTPHeaderField: "X-Bim-Token")
 
@@ -68,17 +68,26 @@ class Queue: NSObject  {
         }
 
         /// Pending error handling if backend is toast.
-        self.pendingRequest = session.dataTask(with: request) { (data, response, error) in
-            if let jsonData = data {
+        self.pendingRequest = session.dataTask(with: request) { [self] (data, response, error) in
+            if let error = error, let request = self.pendingRequest {
+                if request.progress.isCancelled { return }
+                onEventWrapper(
+                    RunnerAction.runError,
+                    withData: ExtraData(message: String(describing:error))
+                )
+            }
+            else if let jsonData = data {
                 do {
                     let tasks: Tasks = try JSONDecoder().decode(Tasks.self, from: jsonData)
                     self.tasks = tasks
-                    print(tasks)
                     if autoStart {
                         self.startRunner()
                     }
                 } catch {
-                    print(error)
+                    onEventWrapper(
+                        RunnerAction.runError,
+                        withData: ExtraData(message: String(describing:error))
+                    )
                 }
             }
         }
@@ -107,13 +116,13 @@ class Queue: NSObject  {
             EventEmitter.sharedInstance.dispatch(
                 Payload(
                     event: Event.task.rawValue,
-                    type: "runStart",
+                    type: RunnerAction.runStart.rawValue,
                     data: ExtraData(name: item.appName, type: item.operation)
                 )
             )
 
             self.runner = Runner(
-                endpoint: URL(string: BIMWebsocketEndpoint)!,
+                endpoint: BIMWebsocketEndpoint,
                 onEvent: self.onEventWrapper,
                 onDone: self.onDoneWrapper,
                 withInitialMessage: "{\"token\":\"\(self.token)\",\"index\":\(self.index)}"
@@ -123,26 +132,26 @@ class Queue: NSObject  {
     
     ///
     ///onEventWrapper
-    ///The Wrapper is needed to alter the emitted event from a regular runner in case we want to use runners ourside of
+    ///The Wrapper is needed to alter the emitted event from a regular runner in case we want to use runners outside of
     ///a Queue context. We are essentially introducing the application name and operation into the event since that's
     ///expected from the UI as part of the multi item logic.
     ///
-    ///- Parameter type: 99% of the time it would be a progress update but, technically, we could see an allow manager flow
+    ///- Parameter type: RunnerAction.runProgress or RunnerAction.runError
     ///- Parameter withData: Event information to send
-    private func onEventWrapper(_ type: Action, withData: ExtraData?) -> Void {
+    private func onEventWrapper(_ runnerAction: RunnerAction, withData: ExtraData?) -> Void {
+        var wrappedData = withData ?? ExtraData()
         if let item = self.item {
-            var wrappedData = withData ?? ExtraData()
             wrappedData.name = item.appName
             wrappedData.type = item.operation
-
-            EventEmitter.sharedInstance.dispatch(
-                Payload(
-                    event: Event.task.rawValue,
-                    type: "runProgress",
-                    data: wrappedData
-                )
-            )
         }
+
+        EventEmitter.sharedInstance.dispatch(
+            Payload(
+                event: Event.task.rawValue,
+                type: runnerAction.rawValue,
+                data: wrappedData
+            )
+        )
     }
     
     ///
@@ -156,7 +165,7 @@ class Queue: NSObject  {
             EventEmitter.sharedInstance.dispatch(
                 Payload(
                     event: Event.task.rawValue,
-                    type: "runSuccess",
+                    type: RunnerAction.runSuccess.rawValue,
                     data: ExtraData(name: item.appName, type: item.operation)
                 )
             )
@@ -174,7 +183,7 @@ class Queue: NSObject  {
                 EventEmitter.sharedInstance.dispatch(
                     Payload(
                         event: Event.task.rawValue,
-                        type: "runCompleted",
+                        type: RunnerAction.runComplete.rawValue,
                         data: ExtraData()
                     )
                 )
@@ -187,7 +196,7 @@ class Queue: NSObject  {
         EventEmitter.sharedInstance.dispatch(
             Payload(
                 event: Event.task.rawValue,
-                type: "runError",
+                type: RunnerAction.runError.rawValue,
                 data: ExtraData(code: code, message: message)
             )
         )

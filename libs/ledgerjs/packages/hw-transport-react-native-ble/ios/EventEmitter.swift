@@ -13,24 +13,17 @@ enum Event: String, CaseIterable {
     
     case newDevice = "new-device"
     case status = "status"
-    case apdu = "apdu"
+    case apdu = "apdu" /// We are currently not exposing these when in background
     case task = "task"
 }
 
-enum Status: String, CaseIterable {
-    case startScanning = "start-scanning"
-    case stopScanning = "stop-scanning"
-    case error = "error"
+enum RunnerAction: String, CaseIterable {
+    case runStart = "runStart"
+    case runProgress = "runProgress"
+    case runSuccess = "runSuccess"
+    case runComplete = "runComplete"
+    case runError = "runError"
 }
-
-enum Action: String, CaseIterable {
-    case permissionRequested = "device-permission-requested"
-    case permissionGranted = "device-permission-granted"
-    case permissionRefused = "device-permission-refused"
-    case bulkProgress = "bulk-progress"
-}
-
-
 
 /// Event payloads
 struct Payload: Codable {
@@ -38,7 +31,6 @@ struct Payload: Codable {
     var type: String
     let data: ExtraData?
 }
-
 
 struct Tasks: Codable {
     let tasks: [Item]
@@ -82,7 +74,7 @@ class EventEmitter {
     private var pendingEvent : DispatchSourceTimer!
     private var lastEventTime : Double = 0
     private var lastEventType : String = "none"
-    private var throttle : Int = 1200 /// Minimum time in ms between events of same type.
+    private var throttle : Int = 1500 /// Minimum time in ms between events of same type.
     
     private init() {}
     
