@@ -63,7 +63,7 @@ export default function Scanning({ onTimeout, onError, onSelect }: Props) {
       next: (e: { type: string; descriptor: any }) => {
         if (e.type === "add") {
           clearTimeout(timeout);
-          const device = e.descriptor
+          const device = e.descriptor;
           setDevices(devices => [...devices, device]);
         }
       },

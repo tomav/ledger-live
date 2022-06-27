@@ -66,6 +66,7 @@ class HwTransportReactNativeBle: RCTEventEmitter {
                                 type: $0.peripheral.uuid.uuidString,
                                 data: ExtraData(
                                     uuid: $0.peripheral.uuid.uuidString,
+                                    rssi: $0.rssi,
                                     name: $0.peripheral.name,
                                     service: $0.serviceUUID.uuidString
                                 )

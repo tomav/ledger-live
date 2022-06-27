@@ -141,9 +141,10 @@ registerTransportModule(httpdebug);
 // BLE is always the fallback choice because we always keep raw id in it
 
 registerTransportModule({
-  id: "ble",
+  id: "ble-bim",
   open: id => BluetoothTransport.open(id),
   disconnect: id => BluetoothTransport.disconnect(id),
+  canOpen: id => !id.includes("|"), // no prefix
 });
 
 if (process.env.NODE_ENV === "production") {

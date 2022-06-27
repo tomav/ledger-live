@@ -47,6 +47,7 @@ struct ExtraData: Codable {
 
     /// Device extras
     var uuid: String?
+    var rssi: Int?
     var name: String?
     var service: String?
     

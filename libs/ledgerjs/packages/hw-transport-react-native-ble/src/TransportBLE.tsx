@@ -11,6 +11,7 @@ import {
   BluetoothRequired,
   CantOpenDevice,
 } from "@ledgerhq/errors";
+import { log } from "@ledgerhq/logs";
 import { type EventSubscription } from "react-native/Libraries/vendor/emitter/EventEmitter";
 import EventEmitter from "./EventEmitter";
 
@@ -31,7 +32,8 @@ class Ble extends Transport {
 
   static log(...m: string[]): void {
     const tag = "ble-verbose";
-    console.log(tag, ...m);
+    // console.log(tag, ...m);
+    log(tag, JSON.stringify([...m]));
   }
 
   constructor(deviceId: string) {
@@ -80,11 +82,13 @@ class Ble extends Transport {
   static listener = EventEmitter?.addListener("BleTransport", (rawEvent) => {
     const { event, type, data } = JSON.parse(rawEvent);
     if (event === "new-device") {
+      console.log("BIMBIM new device ", data);
       Ble.scanObserver?.next({
         type: "add",
         descriptor: {
           id: data.uuid,
           name: data.name,
+          rssi: data.rssi,
           serviceUUIDs: [data.service],
         },
       });
