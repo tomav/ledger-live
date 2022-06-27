@@ -98,6 +98,7 @@ class Runner: NSObject  {
             case .connected(_):
                 // In the case of BIM, we should initiate the message exchange
                 if self.initialMessage != "" {
+                    print("BIM -> \(self.initialMessage)")
                     self.socket!.write(string: self.initialMessage)
                 }
                 break

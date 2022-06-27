@@ -2,6 +2,7 @@ import { useMemo, useCallback, useRef, useState, useEffect } from "react";
 import { Subject } from "rxjs";
 import type { State } from "./types";
 import { withDevice } from "../hw/deviceAccess";
+import { resolveTransportModuleForDeviceId } from "../hw";
 import BIM from "../api/BIM";
 
 const useBackgroundInstallSubject = (
@@ -12,6 +13,9 @@ const useBackgroundInstallSubject = (
   // Whenever the queue changes, we need get a new token, but ONLY if this queue
   // change is because we are adding a new item and not because an item was consumed.
   const observable: any = useRef();
+  const transportModule = resolveTransportModuleForDeviceId(deviceId || "");
+  const disabled = transportModule?.id !== "ble-bim";
+
   const [transport, setTransport] = useState<any>();
   const [pendingTransport, setPendingTransport] = useState<boolean>(false);
   const [token, setToken] = useState<string | void>();
@@ -37,14 +41,14 @@ const useBackgroundInstallSubject = (
       });
       setToken(token);
     }
-
+    if (disabled) return;
     if (queueSize > lastSeenQueueSize.current) {
       // If the queue is larger, our token is no longer valid and we need a new one.
       fetchToken();
     }
     // Always update the last seen
     lastSeenQueueSize.current = queueSize;
-  }, [onEventDispatch, queueSize, setToken, state]);
+  }, [disabled, onEventDispatch, queueSize, setToken, state]);
 
   const cleanUp = useCallback(() => {
     setToken(undefined);
@@ -81,15 +85,17 @@ const useBackgroundInstallSubject = (
   }, [cleanUp, deviceId, onEventDispatch]);
 
   useEffect(() => {
+    if (disabled) return;
     if (shouldStartNewJob) startNewJob();
-  }, [deviceId, shouldStartNewJob, onEventDispatch, startNewJob]);
+  }, [deviceId, shouldStartNewJob, onEventDispatch, startNewJob, disabled]);
 
   useEffect(() => {
+    if (disabled) return;
     if (!token || !transport) return;
     transport.constructor.queue(observable.current, token);
-  }, [token, transport]);
+  }, [disabled, token, transport]);
 
-  return !!deviceId;
+  return !disabled;
 };
 
 export default useBackgroundInstallSubject;
