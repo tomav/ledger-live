@@ -102,12 +102,7 @@ function PortfolioHeader({
   const unit = counterValueCurrency.units[0];
 
   return (
-    <Flex
-      flexDirection="row"
-      alignItems="center"
-      px={6}
-      py={4}
-    >
+    <Flex flexDirection="row" alignItems="center" px={6} py={4}>
       <TouchableWithoutFeedback onPress={scrollToTop}>
         <Flex
           flexDirection={"row"}
