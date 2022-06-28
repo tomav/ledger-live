@@ -38,27 +38,7 @@ public class MainActivity extends ReactActivity {
      */
     @Override
     protected ReactActivityDelegate createReactActivityDelegate() {
-        return new ReactActivityDelegateWrapper(this, new MainActivityDelegate(this, getMainComponentName()) {
-            @Override
-            protected ReactRootView createRootView() {
-                /**
-                 * we should look into upgrading this lib to v2 because
-                 * maintaining this is a tech debt
-                 * */
-                return new RNGestureHandlerEnabledRootView(MainActivity.this);
-            }
-
-            @Override
-            protected Bundle getLaunchOptions() {
-                if (importDataString != null) {
-                    Bundle bundle = new Bundle();
-                    bundle.putString("importDataString", importDataString);
-                    return bundle;
-                } else {
-                    return new Bundle();
-                }
-            }
-        });
+        return new MainActivityDelegate(this, getMainComponentName());
     }
 
     public static class MainActivityDelegate extends ReactActivityDelegate {

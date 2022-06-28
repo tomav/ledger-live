@@ -3,7 +3,7 @@
 import "./polyfill";
 import "./live-common-setup";
 import "../e2e/e2e-bridge-setup";
-import "react-native-gesture-handler";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import React, {
   Component,
   useCallback,
@@ -194,7 +194,7 @@ function App({ importDataString }: AppProps) {
   });
 
   return (
-    <View style={styles.root}>
+    <GestureHandlerRootView style={styles.root}>
       <SyncNewAccounts priority={5} />
       <ExperimentalHeader />
 
@@ -205,7 +205,7 @@ function App({ importDataString }: AppProps) {
       <FeatureToggle feature="ratings">
         <RatingsModal />
       </FeatureToggle>
-    </View>
+    </GestureHandlerRootView>
   );
 }
 
