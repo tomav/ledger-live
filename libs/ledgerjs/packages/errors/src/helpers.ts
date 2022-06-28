@@ -13,22 +13,47 @@ export const addCustomErrorDeserializer = (
   deserializers[name] = deserializer;
 };
 
-type CustomErrorFunc = (
+export type CustomErrorClass<T> = new (
   message?: string,
-  fields?: { [key: string]: any }
-) => void;
+  fields?: { [key: string]: any },
+  options?: any
+) => T;
 
-export const createCustomErrorClass = (name: string): CustomErrorFunc => {
-  const C: CustomErrorFunc = function CustomError(message, fields): void {
-    Object.assign(this, fields);
-    this.name = name;
-    this.message = message || name;
-    this.stack = new Error().stack;
-  };
-  C.prototype = new Error();
+export const createCustomErrorClass = <T>(
+  name: string
+): CustomErrorClass<T> => {
+  class C extends Error {
+    cause?: Error;
+    constructor(message, fields, options) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      super(message || name, options);
+      this.name = name;
+      for (const k in fields) {
+        this[k] = fields[k];
+      }
+      if (isObject(options) && "cause" in options && !("cause" in this)) {
+        // .cause was specified but the superconstructor
+        // did not create an instance property.
+        const cause = options.cause;
+        this.cause = cause;
+        if ("stack" in cause) {
+          this.stack = this.stack + "\nCAUSE: " + cause.stack;
+        }
+      }
+    }
+  }
+
   errorClasses[name] = C;
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   return C;
 };
+
+function isObject(value) {
+  return value !== null && typeof value === "object";
+}
 
 // inspired from https://github.com/programble/errio/blob/master/index.js
 export const deserializeError = (object: any): Error => {
