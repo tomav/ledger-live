@@ -14,7 +14,6 @@ import React, {
 import { connect, useDispatch, useSelector } from "react-redux";
 import {
   StyleSheet,
-  View,
   Text,
   Linking,
   Appearance,
