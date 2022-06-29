@@ -5,8 +5,6 @@
 <PROJECT_ROOT>/node_modules/styled-components/.*
 <PROJECT_ROOT>/node_modules/react-beautiful-dnd
 <PROJECT_ROOT>/node_modules/react-window
-<PROJECT_ROOT>/**/*.tsx
-<PROJECT_ROOT>/**/*.ts
 
 [include]
 
@@ -25,6 +23,7 @@ module.name_mapper='^@ledgerhq/react-ui' ->'<PROJECT_ROOT>/../../libs/ui/package
 module.name_mapper='^@ledgerhq/live-common/\(.*\)' ->'<PROJECT_ROOT>/../../libs/ledger-live-common/\1'
 munge_underscores=true
 esproposal.optional_chaining=enable
+module.file_ext=.ts
 
 [strict]
 
@@ -32,3 +31,6 @@ esproposal.optional_chaining=enable
 .*/node_modules/react-select
 .*/libs/ledger-live-common/.*
 <PROJECT_ROOT>/node_modules/@ledgerhq/live-common/lib/*
+<PROJECT_ROOT>/**/*.tsx
+<PROJECT_ROOT>/**/*.ts
+
