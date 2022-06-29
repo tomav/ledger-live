@@ -14,6 +14,7 @@ import { TrackScreen } from "../../../analytics";
 import { notificationsSelector } from "../../../reducers/settings";
 import { setNotifications } from "../../../actions/settings";
 import { State } from "../../../reducers";
+import { usePreviousRouteName } from "../../../helpers/routeHooks";
 
 type NotificationRowProps = {
   disabled?: boolean;
@@ -78,7 +79,11 @@ function NotificationsSettings() {
 
   return (
     <SettingsNavigationScrollView>
-      <TrackScreen category="Settings" name="Notifications" />
+      <TrackScreen
+        category="Settings"
+        name="Notifications"
+        source={usePreviousRouteName()}
+      />
       <Box p={6} bg={"neutral.c30"} mx={6} borderRadius={2}>
         <Text
           color={"neutral.c100"}
