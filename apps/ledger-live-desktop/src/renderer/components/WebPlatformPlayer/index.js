@@ -437,15 +437,13 @@ const WebPlatformPlayer = ({ manifest, onClose, inputs, config }: Props) => {
     ],
   );
 
-  const handleSend = useCallback(
-    (request: JSONRPCRequest) => {
-      const webview = targetRef.current;
-      if (webview) {
-        webview.contentWindow.postMessage(JSON.stringify(request), url.origin);
-      }
-    },
-    [url],
-  );
+  const handleSend = useCallback((request: JSONRPCRequest) => {
+    const webview = targetRef.current;
+    if (webview) {
+      const origin = new URL(webview.src).origin;
+      webview.contentWindow.postMessage(JSON.stringify(request), origin);
+    }
+  }, []);
 
   const [receive] = useJSONRPCServer(handlers, handleSend);
 
