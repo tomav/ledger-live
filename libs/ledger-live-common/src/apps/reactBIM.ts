@@ -1,9 +1,12 @@
 import { useMemo, useCallback, useRef, useState, useEffect } from "react";
 import { Subject } from "rxjs";
+import { getEnv } from "../env";
 import type { State } from "./types";
 import { withDevice } from "../hw/deviceAccess";
 import { resolveTransportModuleForDeviceId } from "../hw";
 import BIM from "../api/BIM";
+
+const getBaseApiUrl = () => getEnv("API_BIM");
 
 const useBackgroundInstallSubject = (
   deviceId: string | undefined,
@@ -15,7 +18,6 @@ const useBackgroundInstallSubject = (
   const observable: any = useRef();
   const transportModule = resolveTransportModuleForDeviceId(deviceId || "");
   const disabled = transportModule?.id !== "ble-bim";
-
   const [transport, setTransport] = useState<any>();
   const [pendingTransport, setPendingTransport] = useState<boolean>(false);
   const [token, setToken] = useState<string | void>();
@@ -92,7 +94,7 @@ const useBackgroundInstallSubject = (
   useEffect(() => {
     if (disabled) return;
     if (!token || !transport) return;
-    transport.constructor.queue(observable.current, token);
+    transport.constructor.queue(observable.current, token, getBaseApiUrl());
   }, [disabled, token, transport]);
 
   return !disabled;

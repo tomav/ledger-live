@@ -10,6 +10,6 @@
     RCT_EXTERN_METHOD(isConnected: (RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 
     RCT_EXTERN_METHOD(onAppStateChange: (BOOL *) awake)
-    RCT_EXTERN_METHOD(queue: (NSString *) token)
+RCT_EXTERN_METHOD(queue: (NSString *) token endpoint: (NSString *) endpoint)
     RCT_EXTERN_METHOD(observeBluetooth)
 @end

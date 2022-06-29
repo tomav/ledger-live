@@ -187,7 +187,7 @@ class HwTransportReactNativeBle: RCTEventEmitter {
         }
     }
     
-    @objc func queue(_ token: String) -> Void {
+    @objc func queue(_ token: String, endpoint: String) -> Void {
         if let queue = self.queueTask {
             // If the queue is stopped we create a new one
             if !queue.stopped {
@@ -196,7 +196,7 @@ class HwTransportReactNativeBle: RCTEventEmitter {
             }
         }
 
-        self.queueTask = Queue(token: token)
+        self.queueTask = Queue(token: token, endpoint: endpoint)
         
         /// While running a queue, if the device disconnects we wouldn't be notified because we are already
         /// dealing with a connected device and the callback will come from the -connect- from this file. In order

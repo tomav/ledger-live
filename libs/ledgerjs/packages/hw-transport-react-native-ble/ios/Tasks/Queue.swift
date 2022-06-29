@@ -14,8 +14,8 @@ import BleTransport
 /// needing to resolve the scriptrunner url for each one of them (we have it already on Live side, ok, fair enough)
 /// while at the same time breaking the dependency with the JS thread, this is the highlight, yes.
 class Queue: NSObject  {
-    let BIMWebsocketEndpoint = URL(string: "wss://bim.aws.stg.ldg-tech.com/ws/channel")!
-    let BIMUnpackQueue = URL(string: "https://bim.aws.stg.ldg-tech.com/unpacked-queue")!
+    let BIMWebsocketEndpoint: URL
+    let BIMUnpackQueue: URL
 
     var runner : Runner?                        /// Handler of the current task
     var pendingRequest: URLSessionDataTask?     /// Backend request to unpack a token
@@ -28,9 +28,14 @@ class Queue: NSObject  {
     var stopped: Bool = false
 
     public init (
-        token: String
+        token: String,
+        endpoint: String
     ) {
         self.token = token
+        /// This allows us to override the endpoint in case we need to test a new version or staging/prod
+        let host = URL(string: endpoint)!.host ?? ""
+        self.BIMWebsocketEndpoint = URL(string: "wss://\(host)/ws/channel")!
+        self.BIMUnpackQueue = URL(string: "https://\(host)/unpacked-queue")!
         super.init()
         self.resolveQueueFromToken(true)
     }

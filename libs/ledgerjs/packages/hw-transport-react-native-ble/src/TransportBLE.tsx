@@ -32,8 +32,8 @@ class Ble extends Transport {
 
   static log(...m: string[]): void {
     const tag = "ble-verbose";
-    // console.log(tag, ...m);
-    log(tag, JSON.stringify([...m]));
+    console.log(tag, ...m);
+    // log(tag, JSON.stringify([...m]));
   }
 
   constructor(deviceId: string) {
@@ -213,10 +213,16 @@ class Ble extends Transport {
     NativeBle.runner(url);
   };
 
-  static queue = (observer: Observer<any>, token: string): void => {
+  static queue = (
+    observer: Observer<any>,
+    token: string,
+    endpoint: string
+  ): void => {
+    if (!endpoint) throw new Error("No endpoint provided for BIM");
+
     Ble.log("request to launch queue", token);
     Ble.queueObserver = observer;
-    NativeBle.queue(token);
+    NativeBle.queue(token, endpoint);
     // Regarding ↑ there's a bug in this rn version that breaks the mapping
     // between a number on the JS side and Swift. To preserve my sanity, we
     // are using string in the meantime since it's not a big deal.
