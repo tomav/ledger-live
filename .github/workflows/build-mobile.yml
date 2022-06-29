@@ -93,7 +93,7 @@ jobs:
           sdkmanager "build-tools;31.0.0" "platforms;android-31"
           ls $ANDROID_HOME
           ls $ANDROID_HOME/build-tools
-          
+          cd $ANDROID_HOME/build-tools/31.0.0 && mv d8 dx && cd lib && mv d8.jar dx.jar
       - name: install dependencies
         run: pnpm i --filter="live-mobile..." --filter="ledger-live" --no-frozen-lockfile --unsafe-perm
       - uses: ledgerhq/ledger-live/tools/actions/get-package-infos@develop
