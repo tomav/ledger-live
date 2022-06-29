@@ -275,7 +275,7 @@ const txToOps =
     // We are putting the sub operations in place for now, but they will later be exploded out of the operations back to their token accounts
     const subOperations = !transfer_events
       ? []
-      : flatMap(transfer_events.list, (event) => {
+      : flatMap(transfer_events.list, (event, i) => {
           const from = safeEncodeEIP55(event.from);
           const to = safeEncodeEIP55(event.to);
           const sending = addr === from;
@@ -297,7 +297,7 @@ const txToOps =
           if (sending) {
             const type = "OUT";
             all.push({
-              id: `${accountId}-${hash}-${type}`,
+              id: `${accountId}-${hash}-${type}-i${i}`,
               hash,
               type,
               value,
@@ -316,7 +316,7 @@ const txToOps =
           if (receiving) {
             const type = "IN";
             all.push({
-              id: `${accountId}-${hash}-${type}`,
+              id: `${accountId}-${hash}-${type}-i${i}`,
               hash,
               type,
               value,
