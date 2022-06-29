@@ -42338,6 +42338,7 @@ packages:
       use-subscription: 1.7.0_react@17.0.2
       whatwg-fetch: 3.6.2
       ws: 6.2.2
+      yargs: 17.5.1
     transitivePeerDependencies:
       - '@babel/preset-env'
       - bufferutil
@@ -42386,6 +42387,7 @@ packages:
       use-subscription: 1.7.0_react@17.0.2
       whatwg-fetch: 3.6.2
       ws: 6.2.2
+      yargs: 17.5.1
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -42436,6 +42438,7 @@ packages:
       use-subscription: 1.5.1_react@17.0.2
       whatwg-fetch: 3.6.2
       ws: 6.2.2
+      yargs: 17.5.1
     transitivePeerDependencies:
       - '@babel/preset-env'
       - bufferutil
@@ -50761,7 +50764,6 @@ packages:
       string-width: 4.2.3
       y18n: 5.0.8
       yargs-parser: 21.0.1
-    dev: true
 
   /yargs/8.0.2:
     resolution: {integrity: sha1-YpmpBVsc78lp/355wdkY3Osiw2A=}
