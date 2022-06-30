@@ -9,12 +9,15 @@ import { SettingsMedium } from "@ledgerhq/native-ui/assets/icons";
 import SettingsNavigationScrollView from "../SettingsNavigationScrollView";
 import SettingsRow from "../../../components/SettingsRow";
 import Track from "../../../analytics/Track";
-import { TrackScreen } from "../../../analytics";
+import { track, TrackScreen } from "../../../analytics";
 
 import { notificationsSelector } from "../../../reducers/settings";
 import { setNotifications } from "../../../actions/settings";
 import { State } from "../../../reducers";
-import { usePreviousRouteName } from "../../../helpers/routeHooks";
+import {
+  usePreviousRouteName,
+  useCurrentRouteName,
+} from "../../../helpers/routeHooks";
 
 type NotificationRowProps = {
   disabled?: boolean;
@@ -32,6 +35,10 @@ function NotificationSettingsRow({
 
   const { t } = useTranslation();
 
+  const capitalizedKey = capitalize(notificationKey);
+
+  const screen = useCurrentRouteName();
+
   const onChange = useCallback(
     (value: boolean) => {
       dispatch(
@@ -39,11 +46,16 @@ function NotificationSettingsRow({
           [notificationKey]: value,
         }),
       );
+      track("toggle_clicked", {
+        toggle: `Toggle_${
+          capitalizedKey === "Allowed" ? "Allow" : capitalizedKey
+        }`,
+        enabled: value,
+        screen,
+      });
     },
-    [dispatch, notificationKey],
+    [capitalizedKey, dispatch, notificationKey, screen],
   );
-
-  const capitalizedKey = capitalize(notificationKey);
 
   return (
     <SettingsRow

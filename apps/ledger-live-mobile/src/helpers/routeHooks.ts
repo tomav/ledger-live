@@ -4,4 +4,8 @@ function usePreviousRouteName() {
   return useNavigationState(state => state.routes[state.index - 1]?.name);
 }
 
-export { usePreviousRouteName };
+function useCurrentRouteName() {
+  return useNavigationState(state => state.routes[state.index]?.name);
+}
+
+export { usePreviousRouteName, useCurrentRouteName };
