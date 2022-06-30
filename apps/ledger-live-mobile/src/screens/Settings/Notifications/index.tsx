@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { capitalize } from "lodash/fp";
 import { Box, Switch, Text, Button } from "@ledgerhq/native-ui";
 import { SettingsMedium } from "@ledgerhq/native-ui/assets/icons";
+import { useRoute } from "@react-navigation/native";
 
 import SettingsNavigationScrollView from "../SettingsNavigationScrollView";
 import SettingsRow from "../../../components/SettingsRow";
@@ -84,10 +85,17 @@ function NotificationSettingsRow({
 function NotificationsSettings() {
   const { t } = useTranslation();
   const notifications = useSelector(notificationsSelector);
+  const route = useRoute();
 
   const disableSubSettings = !notifications.allowed;
 
-  const openSettings = useCallback(() => Linking.openSettings(), []);
+  const openSettings = useCallback(() => {
+    Linking.openSettings();
+    track("button_clicked", {
+      button: "Go to system settings",
+      screen: route.name,
+    });
+  }, [route.name]);
 
   return (
     <SettingsNavigationScrollView>
